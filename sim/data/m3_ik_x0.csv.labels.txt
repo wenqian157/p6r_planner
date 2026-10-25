@@ -1,0 +1,9 @@
+# row  branch  (simulator row numbering starts at 1 after the header)
+   1  S+W+E+
+   2  S+W+E-
+   3  S+W-E+
+   4  S+W-E-
+   5  S-W+E+
+   6  S-W+E-
+   7  S-W-E+
+   8  S-W-E-
