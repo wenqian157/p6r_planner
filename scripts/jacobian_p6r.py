@@ -64,6 +64,48 @@ def jacobian_reduced(q, point=None):
     return jacobian(q, point)[:, 1:]
 
 
+# ---------------------------------------------------------------- course subchain Jacobian 3J5 (arm only)
+from fk_dh_p6r import DH as DH_P6R, T_BASE as T_BASE_DH
+from fk_dh import dh_row
+
+
+def dh_frame(q, k):
+    """Pose of UR DH frame k (k = 0..6) in the world, from the validated P6R DH table.
+    P6R row 0 is the slide, so UR frame k is reached after rows 0..k."""
+    T = T_BASE_DH.copy()
+    for i in range(k + 1):
+        jtype, off, d, a, alpha = DH_P6R[i]
+        T = T @ (dh_row(off, d + q[i], a, alpha) if jtype == "P" else dh_row(q[i] + off, d, a, alpha))
+    return T
+
+
+def jacobian_3J5(q, point="O5"):
+    """3J5 of the arm (x fixed), lecture-5 style: velocity point on the wrist, both blocks expressed in
+    UR DH frame 3.  6 x 6, columns q1..q6, [v; w].
+
+    The UR12e wrist is offset: axes 4, 5 meet at O4 (DH frame 4 origin), axes 5, 6 meet at O5 (DH frame 5
+    origin), 0.11985 m apart. No point lies on all three, so `point` chooses which pair is decoupled:
+        point="O5": columns 5, 6 lose their linear part, column 4 keeps one (|a4| = d5)
+        point="O4": columns 4, 5 lose their linear part, column 6 keeps one (|a6| = d5)
+
+    Block form  [A C; B W]:
+        A (3x3) how q1..q3 move the point    W (3x3) how q4..q6 rotate the tool (same for both points)
+        B (3x3) how q1..q3 rotate the tool   C (3x3) the offset-wrist leak, one column of length d5
+    For an intersecting wrist C = 0 and det 3J5 = det A * det W.  Here det 3J5 = det A * det(W - B A^-1 C),
+    and numerically: det W = 0 <-> wrist family (q5 = 0), det A(O4) = 0 <-> elbow family (q3 = 0, pi),
+    det A(O5) = 0 at the shoulder family, but det A = 0 alone is neither necessary nor sufficient.
+    det 3J5 = det 0J_red for every q (point shift and frame rotation have unit determinant)."""
+    k = {"O5": 5, "O4": 4}[point]
+    O = dh_frame(q, k)[:3, 3]
+    R3 = dh_frame(q, 3)[:3, :3]
+    J0 = jacobian(q, point=O)[:, 1:]           # 0J of the arm: world frame, velocity point O
+    return np.kron(np.eye(2), R3.T) @ J0       # blockdiag(R3^T, R3^T) @ 0J
+
+
+def blocks_3J5(J):
+    return dict(A=J[:3, :3], C=J[:3, 3:], B=J[3:, :3], W=J[3:, 3:])
+
+
 # ---------------------------------------------------------------- numerical check
 def jacobian_fd(q, h=1e-6):
     """Finite-difference Jacobian from the FK: dp/dq and w from dR R^T."""
