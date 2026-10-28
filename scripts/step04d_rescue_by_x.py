@@ -31,6 +31,16 @@ pi = np.pi
 smin = lambda J: np.linalg.svd(J, compute_uv=False)[-1]
 wrap = lambda a: (a + pi) % (2 * pi) - pi
 
+
+class Tee:
+    """Print to the terminal and keep a copy, so the output can be written to results/ as is."""
+    def __init__(self): self.buf, self.out = [], sys.stdout
+    def write(self, t): self.buf.append(t); self.out.write(t)
+    def flush(self): self.out.flush()
+
+
+sys.stdout = tee = Tee()
+
 # ------------------------------------------------ the configuration sets (x in m, arm in deg)
 D4 = 0.17415
 Z1 = MOUNT_XYZ[2] + 0.1807                                      # height of axis 1
@@ -142,3 +152,12 @@ for name, x0, q_deg, kw, wlab, wfn in SETS:
                      if not any(res < 1e-6 for dx, (res, _) in rows.items() if dx != 0)
                      else "pose held for every x but the arm stays singular: the singular set is invariant under the x self-motion"))
 print("=" * 100)
+
+# ------------------------------------------------ write the output above to results/step04d_rescue_by_x.md
+sys.stdout = tee.out
+out = Path(__file__).resolve().parent.parent / "results" / "step04d_rescue_by_x.md"
+out.parent.mkdir(exist_ok=True)
+header = "# Step 4D: can the slide rescue an arm singularity?" + chr(10) * 2 + "Script: `scripts/step04d_rescue_by_x.py`" + chr(10) * 2
+fence = "```"
+out.write_text(header + fence + "text" + chr(10) + "".join(tee.buf).rstrip() + chr(10) + fence + chr(10), encoding="utf-8")
+print(f"written to {out.relative_to(out.parent.parent)}")

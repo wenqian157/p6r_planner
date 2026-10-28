@@ -150,15 +150,15 @@ if __name__ == "__main__":
               f"   sigma_min(J) = {np.linalg.svd(jacobian(q), compute_uv=False)[-1]:.4e}")
         sys.exit()
 
-    q = np.r_[0.5, np.deg2rad([10, -60, 90, -120, -90, 30])]
+    q_deg = [10, -60, 90, -120, -90, 30]
+    q = np.r_[0.5, np.deg2rad(q_deg)]
     J = jacobian(q)
+    fd = np.abs(J - jacobian_fd(q)).max()
+    slide_ok = np.allclose(J[:, 0], [1, 0, 0, 0, 0, 0])
     print("=== 6 x 7 geometric Jacobian at x = 0.5 m, q = (10,-60,90,-120,-90,30) deg,  rows [vx vy vz wx wy wz] ===")
-    print("        " + "".join(f"{n:>10s}" for n in NAMES))
-    for lbl, row in zip(["vx", "vy", "vz", "wx", "wy", "wz"], J):
-        print(f"{lbl:6s}  " + "".join(f"{v:10.4f}" for v in row))
-    print(f"\nfinite-difference check: max |J - J_fd| = {np.abs(J - jacobian_fd(q)).max():.2e}")
-    print("slide column is [1 0 0 0 0 0]: pure x translation, independent of q  ->",
-          np.allclose(J[:, 0], [1, 0, 0, 0, 0, 0]))
+    print_J(J, NAMES)
+    print(f"\nfinite-difference check: max |J - J_fd| = {fd:.2e}")
+    print("slide column is [1 0 0 0 0 0]: pure x translation, independent of q  ->", slide_ok)
 
     print("\n=== reduced 6 x 6 (x fixed) vs full 6 x 7 at representative configurations ===")
     cases = [
@@ -170,10 +170,37 @@ if __name__ == "__main__":
         ("q = 0  (elbow + wrist singular)",           [0.5,  0,   0,  0,    0,   0,  0]),
     ]
     print(f"{'configuration':40s} {'det J_red':>11s} {'smin_red':>9s} {'rank_red':>8s} {'smin_full':>10s} {'rank_full':>9s}  lost dir [v;w] (arm)        |u_x|")
+    results = []
     for name, c in cases:
         qq = np.r_[c[0], np.deg2rad(c[1:])]
         r = analyse(qq)
+        results.append((name, c, r))
         print(f"{name:40s} {r['det_red']:11.2e} {r['smin_red']:9.2e} {r['rank_red']:8d} {r['smin_full']:10.2e} {r['rank_full']:9d}  "
               f"{np.array2string(r['lost'], precision=2, suppress_small=True):28s} {r['lost_x']:.2f}")
     print("\nreading: rank_full = 6 while rank_red = 5 means the slide rescues the lost direction (|u_x| > 0);")
     print("         rank_full = 5 means the singularity belongs to the whole body (lost direction has no x component).")
+
+    # ------------------------------------------------------------ write results/jacobian_p6r.md
+    from datetime import date
+    rows = ["vx", "vy", "vz", "wx", "wy", "wz"]
+    md = ["# Geometric Jacobian of the P6R", "",
+          f"Date: {date.today().isoformat()}  ", "Script: `scripts/jacobian_p6r.py`  ",
+          "Convention: lecture 5, twist = [v; w] in the world frame, velocity point = flange origin.  ",
+          "Column k: revolute [z_k x (p_t - p_k); z_k], prismatic [z_k; 0].", "",
+          f"## Full 6 x 7 Jacobian at x = 0.5 m, q = {q_deg} deg", "",
+          "| | " + " | ".join(NAMES) + " |", "|---|" + "---|" * 7]
+    md += ["| " + lbl + " | " + " | ".join(f"{v: .4f}" for v in row) + " |" for lbl, row in zip(rows, J)]
+    md += ["", f"Finite-difference check: max |J - J_fd| = {fd:.2e}.  ",
+           f"Slide column equals [1 0 0 0 0 0]: {slide_ok} (pure x translation, independent of q).", "",
+           "## Reduced 6 x 6 (x fixed) vs full 6 x 7 at representative configurations", "",
+           "| configuration | x [m], q [deg] | det J_red | sigma_min(J_red) | rank J_red | sigma_min(J) | rank J | lost direction u [v; w] | abs(u_x) |",
+           "|---|---|---|---|---|---|---|---|---|"]
+    for name, c, r in results:
+        md.append(f"| {name} | {c} | {r['det_red']:.2e} | {r['smin_red']:.2e} | {r['rank_red']} | {r['smin_full']:.2e} | "
+                  f"{r['rank_full']} | {np.array2string(r['lost'], precision=2, suppress_small=True)} | {r['lost_x']:.2f} |")
+    md += ["", "Reading: rank J = 6 with rank J_red = 5 means the slide rescues the lost direction (abs(u_x) > 0). "
+           "rank J = 5 means the singularity belongs to the whole body: the lost direction has no x component.", ""]
+    out = Path(__file__).resolve().parent.parent / "results" / "jacobian_p6r.md"
+    out.parent.mkdir(exist_ok=True)
+    out.write_text("\n".join(md), encoding="utf-8")
+    print(f"\nwritten to {out.relative_to(out.parent.parent)}")

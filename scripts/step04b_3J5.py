@@ -17,6 +17,16 @@ from jacobian_p6r import jacobian_reduced, jacobian_3J5, blocks_3J5
 
 det = np.linalg.det
 
+
+class Tee:
+    """Print to the terminal and keep a copy, so the output can be written to results/ as is."""
+    def __init__(self): self.buf, self.out = [], sys.stdout
+    def write(self, t): self.buf.append(t); self.out.write(t)
+    def flush(self): self.out.flush()
+
+
+sys.stdout = tee = Tee()
+
 # ------------------------------------------------ input: one configuration (x in m, arm in deg)
 x_m = 0.5
 q_deg = [10, -60, 90, -120, -90, 30]    # regular
@@ -64,3 +74,13 @@ else:
     if abs(dA) > 1e-12:
         S = b["W"] - b["B"] @ np.linalg.solve(b["A"], b["C"])
         print(f"check:  det A * det(W - B A^-1 C) = {dA * det(S):9.4f}")
+
+
+# ------------------------------------------------ 4. write the output above to results/step04b_3J5.md
+sys.stdout = tee.out
+out = Path(__file__).resolve().parent.parent / "results" / "step04b_3J5.md"
+out.parent.mkdir(exist_ok=True)
+header = "# Step 4B: subchain Jacobian 3J5 and det A * det W" + chr(10) * 2 + "Script: `scripts/step04b_3J5.py`" + chr(10) * 2
+fence = "```"
+out.write_text(header + fence + "text" + chr(10) + "".join(tee.buf).rstrip() + chr(10) + fence + chr(10), encoding="utf-8")
+print(f"written to {out.relative_to(out.parent.parent)}")

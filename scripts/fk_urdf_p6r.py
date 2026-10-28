@@ -52,14 +52,15 @@ def fk(q, verbose=False):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 8:
-        q = np.r_[float(sys.argv[1]), np.deg2rad([float(v) for v in sys.argv[2:]])]
-    else:
-        q = np.zeros(7)
-    print("x [m] =", q[0], "  arm q [deg] =", np.rad2deg(q[1:]), "\n")
-    T = fk(q, verbose=True)
-    print("\nT_world_flange =\n", T)
+    # if len(sys.argv) == 8:
+    #     q = np.r_[float(sys.argv[1]), np.deg2rad([float(v) for v in sys.argv[2:]])]
+    # else:
+    #     q = np.zeros(7)
+    # print("x [m] =", q[0], "  arm q [deg] =", np.rad2deg(q[1:]), "\n")
+    # T = fk(q, verbose=True)
+    # print("\nT_world_flange =\n", T)
 
-    # consistency with the 6R model: the P6R flange is the UR flange moved by the mount and the slide
-    T_expect = origin([q[0], 0, 0], [0, 0, 0]) @ origin(MOUNT_XYZ, MOUNT_RPY) @ fk_ur6(q[1:])
-    print(f"\nvs 6R model shifted by slide + mount: max |diff| = {np.abs(T - T_expect).max():.2e}")
+    # # consistency with the 6R model: the P6R flange is the UR flange moved by the mount and the slide
+    # T_expect = origin([q[0], 0, 0], [0, 0, 0]) @ origin(MOUNT_XYZ, MOUNT_RPY) @ fk_ur6(q[1:])
+    # print(f"\nvs 6R model shifted by slide + mount: max |diff| = {np.abs(T - T_expect).max():.2e}")
+    print(list(MOUNT_RPY))
