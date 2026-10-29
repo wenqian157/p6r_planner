@@ -51,7 +51,7 @@ P6R_CHAIN = [
 
 #### 1.2 DH table (vendor values, validated against the URDF chain):
 ```python
-DH_UR = [                       # (d, a, alpha), theta = q_i
+DH_UR = [                     
     (0.1807,  0.0,      pi/2),
     (0.0,    -0.6127,   0.0), 
     (0.0,    -0.57155,  0.0), 
@@ -89,9 +89,13 @@ P6R_SCREWS += [screw(w, np.asarray(r, float) + mount) for _, w, r in UR_AXES]
 #### 1.4 Validating 3 models
 
 The three models implement the following equations respectively (URDF chain, DH, PoE): 
+
 $${}^{0}T_{n}(q) = {}^{0}T_{1}(q_1)\,{}^{1}T_{2}(q_2)\cdots{}^{n-1}T_{n}(q_n)$$
+
 $${}^{i-1}T_{i} = R_{z}(\theta_i)\,T_{z}(d_i)\,T_{x}(a_i)\,R_{x}(\alpha_i)$$
+
 $${}^{W}T_{E}(q) = e^{\widehat{{}^{W}\boldsymbol{\xi}_1}\,q_1}\cdots e^{\widehat{{}^{W}\boldsymbol{\xi}_n}\,q_n}\,M$$
+
 Input: x = 0.5 m, q1..q6 = [10, -60, 90, -120, -90, 30] deg
 
 1.4.1 T_world_flange, URDF chain
