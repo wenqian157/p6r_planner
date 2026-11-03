@@ -1,0 +1,43 @@
+(0) vectorised DH rows vs scripts/ik_ur12e.fk_rows: max diff = 0.0e+00
+(0) step 1, vectorised vs scripts/ik_ur12e.py: max diff = 8.9e-16 rad
+
+(a) round trip, 200000 random q in [-pi, pi]^6   (3.41 s, 58,666 poses/s, 8 branches each)
+    original q recovered (|dq| < 1e-6)       : 100.000 %
+    worst recovery error                     : 2.4e-10 rad
+    every returned root reproduces the pose  : True
+    recovered root has q's own label         : 100.000 %
+    number of OK branches per pose (0..8)    : [     0      0   5433      0  27066      0  10097      0 157404]
+
+(b) label persistence: nearest root at the next step has the same label in 99.675 % of 194862 steps
+    the 634 label switches happen next to a singularity where two branches meet:
+      shoulder  r < 1.05 d4   (S+ meets S-) :  67.2 %
+      wrist     |sin q5| < 0.2 (W+ meets W-) :  24.3 %  (not already shoulder)
+      elbow     |sin q3| < 0.2 (E+ meets E-) :   8.5 %  (not already above)
+      none of the three                      :   0.0 %
+
+(c) target = flange pose of section 1.4 (x = 0.5 m, q = [10 -60 90 -120 -90 30] deg)
+    branch     q1..q6 [deg]                                          |dp| URDF [m]  sig_min(J_red)  sig_min(J)
+    S+ W+ E+   [  10.   -37.7   50.9   76.8   90.  -150. ]                 1.0e-15          0.2007      0.5406
+    S+ W+ E-   [  10.    11.3  -50.9  129.6   90.  -150. ]                 5.1e-16          0.2036      0.5432
+    S+ W- E+   [  10.  -60.   90. -120.  -90.   30.]                       5.2e-16          0.3183      0.4837
+    S+ W- E-   [ 10.  26. -90. -26. -90.  30.]                             3.3e-16          0.3330      0.5164
+    S- W+ E+   [-148.6  154.    90.  -154.    90.    51.4]                 5.6e-17          0.3330      0.5140
+    S- W+ E-   [-148.6 -120.   -90.   -60.    90.    51.4]                 4.4e-16          0.3183      0.4757
+    S- W- E+   [-148.6  168.7   50.9   50.4  -90.  -128.6]                 5.6e-16          0.2036      0.5473
+    S- W- E-   [-148.6 -142.3  -50.9  103.2  -90.  -128.6]                 7.1e-16          0.2007      0.5381
+
+(d) same world target, base position swept (o = ok, . = no real IK)
+    x [m]   S+ W+ E+  S+ W+ E-  S+ W- E+  S+ W- E-  S- W+ E+  S- W+ E-  S- W- E+  S- W- E-
+    -1.50          .         .         .         .         .         .         .         .
+    -1.25          .         .         .         .         .         .         .         .
+    -1.00          .         .         .         .         .         .         .         .
+    -0.75          .         .         .         .         .         .         .         .
+    -0.50          .         .         .         .         .         .         .         .
+    -0.25          .         .         .         .         .         .         .         .
+    +0.00          .         .         .         .         .         .         .         .
+    +0.25          .         .         o         o         o         o         .         .
+    +0.50          o         o         o         o         o         o         o         o
+    +0.75          o         o         o         o         o         o         o         o
+    +1.00          o         o         o         o         o         o         o         o
+    +1.25          o         o         o         o         o         o         o         o
+    +1.50          o         o         o         o         o         o         o         o

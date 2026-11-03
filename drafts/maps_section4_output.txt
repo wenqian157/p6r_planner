@@ -1,0 +1,57 @@
+(0) singular values, vectorised vs scripts/jacobian_p6r.py over 200 random q:  J_red 1.8e-15,  J 1.3e-15
+(0b) det J_red = a2 a3 s3 s5 (a2 c2 + a3 c23 + d5 s234):  max |num - formula| = 2.5e-16   (|det| up to 0.33)
+     shoulder factor^2 + d4^2 = r^2 (|O5_xy|^2):  max error = 6.7e-16   -> factor = 0  <=>  r = d4
+
+===== orientation: tool down, flange height z = 0.6 m, grid 261 x 161, step 0.02 m, sigma_min threshold 0.05
+(1) map(x=+1) equals map(x=0) shifted by +1 m on 100.000 % of overlapping cells
+(2) area per class at x = 0 [m^2]             feasible   no real IK  joint limit     singular
+    S+ W+ E+                              3.46        13.29         0.00         0.06
+    S+ W+ E-                              3.46        13.29         0.00         0.06
+    S+ W- E+                              5.18        11.51         0.00         0.12
+    S+ W- E-                              5.16        11.51         0.00         0.13
+    S- W+ E+                              5.16        11.51         0.00         0.13
+    S- W+ E-                              5.18        11.51         0.00         0.12
+    S- W- E+                              3.46        13.29         0.00         0.06
+    S- W- E-                              3.46        13.29         0.00         0.06
+    cells with >= 1 feasible branch: 5.22 m^2;   count histogram (0..8 branches): [28973     0     0     0  4504     0    28     0  8516]
+(3) singular cells (all branches, x = 0): 1832;  of these sigma_min(J) >= 0.05 (slide rescues): 93.7 %
+      shoulder:   904 cells, slide rescues  87.2 %
+      elbow   :   928 cells, slide rescues 100.0 %
+      wrist   :     0 cells
+(4) task region x in [-1.5, 1.5], y in [0.5, 0.9]: covered by >= 1 feasible branch
+      base at x = -1 m :  53.5 %
+      base at x = +0 m :  73.1 %
+      base at x = +1 m :  52.9 %
+      union of the three  : 100.0 %   (only one x works on 27.2 %)
+      per branch, union over x: S+ W+ E+ 100%, S+ W+ E- 100%, S+ W- E+ 100%, S+ W- E- 100%, S- W+ E+ 100%, S- W+ E- 100%, S- W- E+ 100%, S- W- E- 100%
+
+===== orientation: tool horizontal, flange height z = 0.6 m, grid 261 x 161, step 0.02 m, sigma_min threshold 0.05
+(1) map(x=+1) equals map(x=0) shifted by +1 m on 100.000 % of overlapping cells
+(2) area per class at x = 0 [m^2]             feasible   no real IK  joint limit     singular
+    S+ W+ E+                              4.07        12.45         0.00         0.29
+    S+ W+ E-                              4.07        12.45         0.00         0.29
+    S+ W- E+                              4.07        12.44         0.00         0.29
+    S+ W- E-                              4.07        12.44         0.00         0.29
+    S- W+ E+                              4.07        12.44         0.00         0.29
+    S- W+ E-                              4.07        12.44         0.00         0.29
+    S- W- E+                              4.07        12.45         0.00         0.29
+    S- W- E-                              4.07        12.45         0.00         0.29
+    cells with >= 1 feasible branch: 4.29 m^2;   count histogram (0..8 branches): [31302     4    16     4   949     2   174     2  9568]
+(3) singular cells (all branches, x = 0): 5816;  of these sigma_min(J) >= 0.05 (slide rescues): 34.3 %
+      shoulder:   606 cells, slide rescues  86.1 %
+      elbow   :   988 cells, slide rescues 100.0 %
+      wrist   :  4222 cells, slide rescues  11.4 %
+(4) task region x in [-1.5, 1.5], y in [0.5, 0.9]: covered by >= 1 feasible branch
+      base at x = -1 m :  51.3 %
+      base at x = +0 m :  68.6 %
+      base at x = +1 m :  50.6 %
+      union of the three  : 100.0 %   (only one x works on 32.5 %)
+      per branch, union over x: S+ W+ E+ 100%, S+ W+ E- 100%, S+ W- E+ 100%, S+ W- E- 100%, S- W+ E+ 100%, S- W+ E- 100%, S- W- E+ 100%, S- W- E- 100%
+
+(5) sensitivity of the singular class to the threshold (tool down, x = 0, all branches)
+      sigma_min < 0.01 :   0.0 % of the cells with real IK
+      sigma_min < 0.02 :   0.2 % of the cells with real IK
+      sigma_min < 0.05 :   2.1 % of the cells with real IK
+      sigma_min < 0.1  :   7.4 % of the cells with real IK
+
+done in 7.4 s; figures in /sessions/rcw-01wr7rugeqcpzsab9o7jahzk/mnt/p6r_planner/drafts/figures
