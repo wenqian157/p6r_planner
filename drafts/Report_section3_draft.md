@@ -27,7 +27,7 @@ Notation: ${}^{0}T_{6} = [R \mid p]$, columns $x_6, y_6, z_6$ of R; $c_i = \cos 
 O5 lies in the arm plane, and the arm plane is at distance d4 from axis 1. Seen from above, with
 $r = \sqrt{p_{5x}^2 + p_{5y}^2}$:
 
-$$q_1 = \operatorname{atan2}(p_{5y}, p_{5x}) \pm \arccos\!\left(\frac{d_4}{r}\right) + \frac{\pi}{2}, \qquad \text{real iff } r \ge d_4$$
+$$q_1 = \mathrm{atan2}(p_{5y}, p_{5x}) \pm \arccos\!\left(\frac{d_4}{r}\right) + \frac{\pi}{2}, \qquad \text{real iff } r \ge d_4$$
 
 The ± picks on which side of axis 1 the arm plane passes (shoulder left/right). $r = d_4$ is the
 **shoulder singularity**: the two branches merge.
@@ -43,7 +43,7 @@ The sign of q5 is the wrist flip. $s_5 = 0$ is the **wrist singularity** (z6 par
 
 **Step 3 - q6 (unique).** From the first two components of the same vector:
 
-$$q_6 = \operatorname{atan2}\!\left(\frac{-w_y}{s_5}, \frac{w_x}{s_5}\right)$$
+$$q_6 = \mathrm{atan2}\!\left(\frac{-w_y}{s_5}, \frac{w_x}{s_5}\right)$$
 
 At $s_5 = 0$ q6 is not determined (q4 and q6 rotate about the same axis); the solver then sets q6 = 0 and
 lets q4 take the whole rotation.
@@ -56,14 +56,14 @@ Its origin $(p_x, p_y, d_4)$ is O4 in frame 1, reached by the two links a2, a3 i
 Law of cosines:
 
 $$c_3 = \frac{p_x^2 + p_y^2 - a_2^2 - a_3^2}{2a_2a_3}, \qquad q_3 = \pm\arccos(c_3), \qquad
-q_2 = \operatorname{atan2}(p_y, p_x) - \operatorname{atan2}(a_3 s_3,\; a_2 + a_3 c_3)$$
+q_2 = \mathrm{atan2}(p_y, p_x) - \mathrm{atan2}(a_3 s_3,\; a_2 + a_3 c_3)$$
 
 Real iff $|c_3| \le 1$ (O4 within reach of the 2R); $c_3 = \pm 1$ is the **elbow singularity**
 (arm stretched or folded).
 
 **Step 5 - q4 (unique).** The three parallel joints add their angles in the plane:
 
-$$q_2 + q_3 + q_4 = \operatorname{atan2}\big({}^{1}R_{4}[1,0],\; {}^{1}R_{4}[0,0]\big)$$
+$$q_2 + q_3 + q_4 = \mathrm{atan2}\big({}^{1}R_{4}[1,0],\; {}^{1}R_{4}[0,0]\big)$$
 
 Each step either has two roots or one, so a pose has at most **2 (S) x 2 (W) x 2 (E) = 8** branches.
 A branch disappears only through step 1 (r < d4) or step 4 (|c3| > 1); q5 always has a root since |w_z| ≤ 1.
