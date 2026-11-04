@@ -400,6 +400,8 @@ reading:
 
 - Moving the base translates the whole map: the slide adds reach only along x.
 
+#### 4.3 Out of curiosity, Reachable-position maps with different flange orientation 
+![reach maps](figures/reach_map_x0_tilt.png)
 
 ### 5. Cartesian path and the (s, x) redundancy plane
 
