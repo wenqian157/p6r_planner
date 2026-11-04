@@ -146,62 +146,150 @@ DH table vs PoE                 1.22e-15               2.51e-14
 Verdict: the three models agree (tolerance 1e-09 m, 1e-06 deg).
 
 ### 2. Jacobians
-#### 2.1 Full 6 x 7 Jacobian J and Reduced 6 x 6 Jacobian J_red
-With a given posture, a full 6 x 7 Jacobian (J) and a reduced 6 x 6 Jacobian (J_red) are built.
-
-Full 6 x 7 Jacobian at x = 0.5 m, q = [10, -60, 90, -120, -90, 30] deg
+#### Symbolic Jacobians of the P6R: 0J6 (J_red) and the full 6 x 7 J
 
 ```text
-         x       q1       q2       q3       q4       q5       q6
-vx  1.0000  -0.3315   0.1263  -0.3962  -0.1148  -0.0202   0.0000
-vy  0.0000   0.8769   0.0223  -0.0699  -0.0202   0.1148   0.0000
-vz  0.0000   0.0000  -0.9212  -0.6148  -0.1198   0.0000  -0.0000
-wx  0.0000   0.0000  -0.1736  -0.1736  -0.1736   0.9848  -0.0000
-wy  0.0000   0.0000   0.9848   0.9848   0.9848   0.1736   0.0000
-wz  0.0000   1.0000   0.0000   0.0000   0.0000  -0.0000  -1.0000
+1. 0J6: arm Jacobian in DH frame 0 of the arm
+  column q1:
+     vx: -a2*sin(q1)*cos(q2) - a3*sin(q1)*cos(q2 + q3) + d4*cos(q1) - d5*sin(q1)*sin(q2 + q3 + q4) + d6*sin(q1)*sin(q5)*cos(q2 + q3 + q4) + d6*cos(q1)*cos(q5)
+     vy: a2*cos(q1)*cos(q2) + a3*cos(q1)*cos(q2 + q3) + d4*sin(q1) + d5*sin(q2 + q3 + q4)*cos(q1) + d6*sin(q1)*cos(q5) - d6*sin(q5)*cos(q1)*cos(q2 + q3 + q4)
+     vz: 0
+     wx: 0
+     wy: 0
+     wz: 1
+  column q2:
+     vx: (-a2*sin(q2) - a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*cos(q1)
+     vy: (-a2*sin(q2) - a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*sin(q1)
+     vz: a2*cos(q2) + a3*cos(q2 + q3) + d5*sin(q2 + q3 + q4) - d6*sin(q5)*cos(q2 + q3 + q4)
+     wx: sin(q1)
+     wy: -cos(q1)
+     wz: 0
+  column q3:
+     vx: (-a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*cos(q1)
+     vy: (-a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*sin(q1)
+     vz: a3*cos(q2 + q3) + d5*sin(q2 + q3 + q4) - d6*sin(q5)*cos(q2 + q3 + q4)
+     wx: sin(q1)
+     wy: -cos(q1)
+     wz: 0
+  column q4:
+     vx: (d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*cos(q1)
+     vy: (d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*sin(q1)
+     vz: d5*sin(q2 + q3 + q4) - d6*sin(q5)*cos(q2 + q3 + q4)
+     wx: sin(q1)
+     wy: -cos(q1)
+     wz: 0
+  column q5:
+     vx: -d6*(sin(q1)*sin(q5) + cos(q1)*cos(q5)*cos(q2 + q3 + q4))
+     vy: d6*(-sin(q1)*cos(q5)*cos(q2 + q3 + q4) + sin(q5)*cos(q1))
+     vz: -d6*sin(q2 + q3 + q4)*cos(q5)
+     wx: sin(q2 + q3 + q4)*cos(q1)
+     wy: sin(q1)*sin(q2 + q3 + q4)
+     wz: -cos(q2 + q3 + q4)
+  column q6:
+     vx: 0
+     vy: 0
+     vz: 0
+     wx: sin(q1)*cos(q5) - sin(q5)*cos(q1)*cos(q2 + q3 + q4)
+     wy: -sin(q1)*sin(q5)*cos(q2 + q3 + q4) - cos(q1)*cos(q5)
+     wz: -sin(q5)*sin(q2 + q3 + q4)
+```
+```text
+2. WJ6 = J_red: the same arm Jacobian in the world frame
+
+  WJ6 = blockdiag(R0, R0) 0J6,  R0 = Rz(pi) = rotation of DH frame 0 in the world (base_link_inertia yaw)
+  -> every column has its rows vx, vy, wx, wy negated; vz, wz unchanged.
+  column q1:
+     vx: a2*sin(q1)*cos(q2) + a3*sin(q1)*cos(q2 + q3) - d4*cos(q1) + d5*sin(q1)*sin(q2 + q3 + q4) - d6*sin(q1)*sin(q5)*cos(q2 + q3 + q4) - d6*cos(q1)*cos(q5)
+     vy: -a2*cos(q1)*cos(q2) - a3*cos(q1)*cos(q2 + q3) - d4*sin(q1) - d5*sin(q2 + q3 + q4)*cos(q1) - d6*sin(q1)*cos(q5) + d6*sin(q5)*cos(q1)*cos(q2 + q3 + q4)
+     vz: 0
+     wx: 0
+     wy: 0
+     wz: 1
+  column q2:
+     vx: -(-a2*sin(q2) - a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*cos(q1)
+     vy: -(-a2*sin(q2) - a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*sin(q1)
+     vz: a2*cos(q2) + a3*cos(q2 + q3) + d5*sin(q2 + q3 + q4) - d6*sin(q5)*cos(q2 + q3 + q4)
+     wx: -sin(q1)
+     wy: cos(q1)
+     wz: 0
+  column q3:
+     vx: -(-a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*cos(q1)
+     vy: -(-a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*sin(q1)
+     vz: a3*cos(q2 + q3) + d5*sin(q2 + q3 + q4) - d6*sin(q5)*cos(q2 + q3 + q4)
+     wx: -sin(q1)
+     wy: cos(q1)
+     wz: 0
+  column q4:
+     vx: -(d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*cos(q1)
+     vy: -(d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*sin(q1)
+     vz: d5*sin(q2 + q3 + q4) - d6*sin(q5)*cos(q2 + q3 + q4)
+     wx: -sin(q1)
+     wy: cos(q1)
+     wz: 0
+  column q5:
+     vx: d6*(sin(q1)*sin(q5) + cos(q1)*cos(q5)*cos(q2 + q3 + q4))
+     vy: -d6*(-sin(q1)*cos(q5)*cos(q2 + q3 + q4) + sin(q5)*cos(q1))
+     vz: -d6*sin(q2 + q3 + q4)*cos(q5)
+     wx: -sin(q2 + q3 + q4)*cos(q1)
+     wy: -sin(q1)*sin(q2 + q3 + q4)
+     wz: -cos(q2 + q3 + q4)
+  column q6:
+     vx: 0
+     vy: 0
+     vz: 0
+     wx: -sin(q1)*cos(q5) + sin(q5)*cos(q1)*cos(q2 + q3 + q4)
+     wy: sin(q1)*sin(q5)*cos(q2 + q3 + q4) + cos(q1)*cos(q5)
+     wz: -sin(q5)*sin(q2 + q3 + q4)
+```
+```text
+3. WJ: whole-body Jacobian (6 x 7) in the world frame, columns (x, q1..q6) 
+  WJ = [ e | WJ6 ],   e = [1 0 0 0 0 0]^T: the slide column is pure x translation and contains no q.
+  J_red = WJ[:, 1:] = WJ6 (x fixed).
+
 ```
 
-Reduced 6 x 6 Jacobian, x fixed, q = [10, -60, 90, -120, -90, 30] deg
+
+
+#### 2.2 Decoupling 0J6 for the UR12e: plane split instead of wrist split (x fixed)
 
 ```text
-         q1       q2       q3       q4       q5       q6
-vx  -0.3315   0.1263  -0.3962  -0.1148  -0.0202   0.0000
-vy   0.8769   0.0223  -0.0699  -0.0202   0.1148   0.0000
-vz   0.0000  -0.9212  -0.6148  -0.1198   0.0000  -0.0000
-wx   0.0000  -0.1736  -0.1736  -0.1736   0.9848  -0.0000
-wy   0.0000   0.9848   0.9848   0.9848   0.1736   0.0000
-wz   1.0000   0.0000   0.0000   0.0000  -0.0000  -1.0000
+1. Structure.  Axes 2, 3 and 4 are parallel.  Joints q2, q3, q4 form a planar 3R inside the arm
+   plane: they can only slide O5 within that plane and rotate about its normal. Joint q1 turns the plane about the vertical, joints q5, q6 tilt the tool out of the plane and meet at O5.
+   Partition: rows into in-plane (vx, vy, wz) and out-of-plane (vz, wx, wy), columns into the parallel group (q2, q3, q4) and the rest (q1, q5, q6).  Point O5, frame 3 (aligned with the plane).
 ```
-
-#### 2.2 Subchain Jacobian 3J5 of the arm (x fixed)
-
 ```text
-x = 0.5 m,  arm q = [10, -60, 90, -120, -90, 30] deg,  velocity point O5,  frame = UR DH frame 3
+2. 3J5 in plane-split form :
 
-3J5 =
-               q1       q2       q3   |       q4       q5       q6
-  vx       0.1508  -0.6726  -0.0599   |  -0.0599   0.0000  -0.0000
-  vy      -0.0871  -0.6753  -0.6753   |  -0.1038   0.0000   0.0000
-  vz       0.9212  -0.0000   0.0000   |  -0.0000   0.0000  -0.0000
-       -----------------------------+---------------------------
-  wx       0.5000  -0.0000  -0.0000   |  -0.0000  -0.8660  -0.5000
-  wy       0.8660   0.0000   0.0000   |   0.0000   0.5000  -0.8660
-  wz       0.0000   1.0000   1.0000   |   1.0000  -0.0000  -0.0000
+               q2 q3 q4 |  q1 q5 q6
+   vx vy wz  [    P     |    X     ]
+   vz wx wy  [    0     |    Q     ]
 
-           [   A   |   C   ]
-           [   B   |   W   ]
-
-det A           =    0.3812      (A = 3J5[0:3, 0:3], how q1..q3 move O5)
-det W           =    1.0000      (W = 3J5[3:6, 3:6], how q4..q6 rotate the tool)
-det A * det W   =    0.3812
-det 3J5         =    0.3226
-det 0J_red      =    0.3226      (same as det 3J5: point shift and rotation have unit det)
-
-C = 3J5[0:3, 3:6] column norms = [0.1199 0.     0.    ]
-C is not 0: column q4 still moves O5 by 0.1199 m per rad (= d5, the wrist offset).
-So 3J5 is NOT block triangular and det 3J5 = det A * det(W - B A^-1 C), not det A * det W.
-check:  det A * det(W - B A^-1 C) =    0.3226
+   The zero block: parallel joints produce no vz, wx, wy.  It replaces the zero block that an intersecting wrist would give; the offset-wrist leak column now sits inside X and is harmless.
 ```
+```text
+3. det J = det P * det Q (block triangular, same role as det A * det W in lecture 5)
+
+   P = [ a2 s3 + d5 c4      d5 c4        d5 c4 ]      det P = a2 a3 sin q3
+       [ a2 c3 + a3 + d5 s4 a3 + d5 s4   d5 s4 ]
+       [ 1                  1            1     ]
+
+   Q = [ -rho   0      0      ]      rho = a2 c2 + a3 c23 + d5 s234
+       [  s23   s4    -s5 c4  ]      det Q = rho * sin q5
+       [  c23  -c4    -s5 s4  ]
+
+   det J = a2 a3 sin q3 * rho * sin q5
+```
+```text
+4. Three families, one block each:
+   - planar arm block P         sin q3 = 0     elbow family
+   - shoulder entry rho         rho = 0        shoulder family: the only entry that moves O5 out of the
+                                               plane direction vanishes (O5 above the shoulder line)
+   - wrist 2x2 in Q             sin q5 = 0     wrist family: out-of-plane rotations from q5, q6 collapse
+```
+<img src="figures/elbow_s.png" width="32%">
+<img src="figures/shoulder_s.png" width="32%">
+<img src="figures/wrist_s.png" width="32%">
+
 
 #### 2.3 Reduced J_red vs full J at representative configurations
 
@@ -271,6 +359,10 @@ Elbow vertical (type B):   x = 0.5 m,  q = [  0 -90   0   0 -90   0] deg
                 0.300    1.69e-03     no            0.0080       1.9263   [ 91.9 -88.    1.9  -3.9 -90.   91.9]
           -> no x holds the pose: reach boundary in a direction the slide cannot fix
 ```
+the final chart will hit the a wall
+
+is there a place where ik drop below 8, an area? 2-4-6-8
+
 
 ### 3. Analytical IK solver
 
