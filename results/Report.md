@@ -359,16 +359,48 @@ Elbow vertical (type B):   x = 0.5 m,  q = [  0 -90   0   0 -90   0] deg
                 0.300    1.69e-03     no            0.0080       1.9263   [ 91.9 -88.    1.9  -3.9 -90.   91.9]
           -> no x holds the pose: reach boundary in a direction the slide cannot fix
 ```
-the final chart will hit the a wall
-
-is there a place where ik drop below 8, an area? 2-4-6-8
-
 
 ### 3. Analytical IK solver
 
+Megi
 
 ### 4. Reachable-position maps over discrete base positions
+#### 4.1 Reachable-position maps, joint limits +/- pi
+
+The maps show the geometric branch count: every joint angle is wrapped to (-pi, pi), so a configuration and its +/- 2 pi copie from UR12e are counted once. The UR12e's own limits (+/- 2 pi on all joints, +/- pi on the elbow) are never tighter than 180 deg, so they remove no geometric branch and the count needs no further filtering.  Any tighter limit would act as a filter on the same grid, lowering the count where a branch leaves the allowed interval.
+
+![reach map x = 0](figures/reach_map_x0.png)
+```text
+flange orientation R (world), columns = flange axes:
+[[ 0.  0.  1.]
+ [ 0.  1.  0.]
+ [-1.  0.  0.]]
+
+flange height z = 0.9 m  (arm base at 0.42 m, shoulder axis at 0.6007 m)
+
+grid: x_w in [-2.4, 2.4] m, y_w in [-1.4, 1.4] m, step 0.02 m, 241 x 141 = 33981 IK calls per map, 40 s for 3 maps
+```
+#### 4.2 Reachable-position maps with discrete base x
+![reach maps](figures/reach_maps_x.png)
+
+```text
+base at x = -1.0 m: 0 IK: 22129 pts, 4 IK: 4176 pts, 8 IK: 7676 pts;  reachable radius from axis 1: 0.179 .. 1.241 m
+
+base at x = +0.0 m: 0 IK: 22129 pts, 4 IK: 4176 pts, 8 IK: 7676 pts;  reachable radius from axis 1: 0.179 .. 1.241 m
+
+base at x = +1.0 m: 0 IK: 22129 pts, 4 IK: 4176 pts, 8 IK: 7676 pts;  reachable radius from axis 1: 0.179 .. 1.241 m
+```
+reading: 
+- the count is constant on regions bounded by the images of the three singular families:
+
+    - Outer boundary: elbow family (arm stretched)---0 IK  
+    - Inner hole of radius d4 = 0.174 m: shoulder family(O5 cannot come closer to axis 1 than the arm-plane offset)---0 IK  
+    - Inside r = 1.0 m all 8 branches exist---8 IK
+    - In the ring 1.0 .. 1.24 m only one wrist choice keeps O4 within the planar 2R reach---4 IK
+
+- Moving the base translates the whole map: the slide adds reach only along x.
 
 
 ### 5. Cartesian path and the (s, x) redundancy plane
 
+the final chart will hit the a wall
