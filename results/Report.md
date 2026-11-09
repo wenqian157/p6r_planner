@@ -250,37 +250,44 @@ Verdict: the three models agree (tolerance 1e-09 m, 1e-06 deg).
 
 
 
-#### 2.2 Decoupling 0J6 for the UR12e: plane split instead of wrist split (x fixed)
-
+#### 2.2 Decoupling 3J5 of the UR12e: 1 + 3 + 2: plane split instead of wrist split (x fixed)
 ```text
-1. Structure.  Axes 2, 3 and 4 are parallel.  Joints q2, q3, q4 form a planar 3R inside the arm
-   plane: they can only slide O5 within that plane and rotate about its normal. Joint q1 turns the plane about the vertical, joints q5, q6 tilt the tool out of the plane and meet at O5.
-   Partition: rows into in-plane (vx, vy, wz) and out-of-plane (vz, wx, wy), columns into the parallel group (q2, q3, q4) and the rest (q1, q5, q6).  Point O5, frame 3 (aligned with the plane).
+
+Axes 2, 3, 4 are parallel, so joints q2, q3, q4 form a planar 3R inside the arm plane: they slide O5 within the plane and rotate about its normal, nothing else. Joint q1 turns the plane about the vertical, joints q5, q6 tilt the tool out of the plane and meet at O5. With the velocity point at O5 and the components expressed in frame 3 (x, y in the plane, z along its normal), reorder rows and columns:
+
+   rows:     in-plane motion (vx, vy, wz) | out-of-plane translation (vz) | out-of-plane rotation (wx, wy)
+   columns:  planar group (q2, q3, q4)    | shoulder (q1)                 | wrist (q5, q6)
+
+                     q2 q3 q4   |   q1   |  q5  q6
+   vx vy wz      [     P        |   *    |    *     ]
+   vz            [     0        |  -rho  |    0     ]
+   wz wy ->      [     0        |   *    |    W2    ]
+   (wx wy)
+
+   P  = [ a2 s3 + d5 c4       d5 c4       d5 c4 ]        planar 3R at O5
+        [ a2 c3 + a3 + d5 s4  a3 + d5 s4  d5 s4 ]
+        [ 1                   1           1     ]
+
+   rho = a2 c2 + a3 c23 + d5 s234                        in-plane radial coordinate of O5
+
+   W2 = [  s4   -s5 c4 ]                                 out-of-plane rotations from q5, q6
+        [ -c4   -s5 s4 ]
+
+The zeros: the parallel joints produce no vz, wx, wy; the wrist joints do not move O5.  The matrix is block
+triangular, so
+
+   det 3J5 = det P * (-rho) * det W2 = (a2 a3 sin q3) * (-rho) * (-sin q5)
+           = a2 a3 sin q3 sin q5 (a2 c2 + a3 c23 + d5 s234)
+
+Three blocks, three families, and the three groups of the analytical IK:
+
+   block  size  joints      vanishes when                family     IK group
+   P      3x3   q2 q3 q4    sin q3 = 0                   elbow      planar 3R, elbow up/down
+   rho    1x1   q1          a2 c2 + a3 c23 + d5 s234 = 0 shoulder   q1 from O5, left/right
+   W2     2x2   q5 q6       sin q5 = 0                   wrist      q5, q6 from orientation, flip
 ```
 ```text
-2. 3J5 in plane-split form :
-
-               q2 q3 q4 |  q1 q5 q6
-   vx vy wz  [    P     |    X     ]
-   vz wx wy  [    0     |    Q     ]
-
-   The zero block: parallel joints produce no vz, wx, wy.  It replaces the zero block that an intersecting wrist would give; the offset-wrist leak column now sits inside X and is harmless.
-```
-```text
-3. det J = det P * det Q (block triangular, same role as det A * det W in lecture 5)
-
-   P = [ a2 s3 + d5 c4      d5 c4        d5 c4 ]      det P = a2 a3 sin q3
-       [ a2 c3 + a3 + d5 s4 a3 + d5 s4   d5 s4 ]
-       [ 1                  1            1     ]
-
-   Q = [ -rho   0      0      ]      rho = a2 c2 + a3 c23 + d5 s234
-       [  s23   s4    -s5 c4  ]      det Q = rho * sin q5
-       [  c23  -c4    -s5 s4  ]
-
-   det J = a2 a3 sin q3 * rho * sin q5
-```
-```text
-4. Three families, one block each:
+Three families, one block each:
    - planar arm block P         sin q3 = 0     elbow family
    - shoulder entry rho         rho = 0        shoulder family: the only entry that moves O5 out of the
                                                plane direction vanishes (O5 above the shoulder line)
@@ -405,4 +412,74 @@ reading:
 
 ### 5. Cartesian path and the (s, x) redundancy plane
 
-the final chart will hit the a wall
+(the final chart will hit the a wall)
+
+With x fixed the robot is a 6R arm with at most 8 IK branches. Letting x vary turns every branch into a one-parameter family of solutions. The redundancy is drawn as a
+map with the path progress s on the horizontal axis and the redundant joint, here the base position x, on the vertical axis. Every dot is one analytical IK evaluation.
+
+#### 5.1 Path
+
+A closed rectangle in the horizontal plane, tool axis pointing down, longer than the arm can reach from one base position, so the base has to move:
+
+```text
+corners (x_w, y_w)   (-0.8, 0.25) -> (0.8, 0.25) -> (0.8, 0.85) -> (-0.8, 0.85) -> back     
+flange height        z = 0.9 m
+orientation          flange outward normal (axis 6) pointing down, flange z along +x_w
+s                    arc length over the 4.4 m perimeter, 111 samples
+x                    base position, -1.0 .. 1.0 m, step 0.05 m (41 positions)
+```
+
+#### 5.2 Classification of one dot
+
+For each (s, x) the analytical IK of the arm is run with the base at x. A branch gets a green dot when it has a root and the fixed-x arm is regular, sigma_min(J_red) >= 0.03; otherwise grey (no root, or the root is singular). Joint limits are +/- pi, so no root is lost to limits. On this path the singular classes stay empty: the tool-down orientation keeps q5 at +/- 90 deg, far from the wrist family, and the rectangle stays
+outside the shoulder hole of radius d4. The only family touched is the elbow, at the edge of the reach band, where the root disappears at the same place.
+
+#### 5.3 Map
+
+<img src="figures/sx_map.png" width="100%">
+
+One panel per branch. The green band follows the x coordinate of the tool along the rectangle: it rises on the first long side and falls on the return. No horizontal line stays green in any panel, so a parked base cannot execute this path.
+
+
+#### 5.4 Base schedule x(s), analytical planning
+
+Within one branch the green dots form a layered graph over s. Two dots in neighbouring layers are connected when the base moves at most 0.05 m and every joint moves at most 0.5 rad, measured on the unwrapped angles so that a jump across +/- pi is rejected. Dynamic programming returns the cheapest complete schedule from the fixed start x(0) = -1.0 m with
+
+```text
+cost = sum over steps of ( |dq|_2 [rad]  +  2 * |dx| [m] )
+```
+
+i.e. joint travel plus a penalty on base travel; it is a distance, not a time.
+
+```text
+branch     plan cost   x range of the schedule
+S+ W+ E+      11.79    [-1.00, +0.40] m
+S+ W+ E-       none    q4 crosses +/- pi along the path
+S+ W- E+      10.31    [-1.00, +0.05] m      <- best
+S+ W- E-      10.51    [-1.00, +0.05] m
+S- W+ E+       none    q2 and q4 cross +/- pi along the path
+S- W+ E-      11.04    [-1.00, +0.10] m
+S- W- E+      12.97    [-1.00, +0.50] m
+S- W- E-      12.76    [-1.00, +0.45] m
+
+best branch S+ W- E+: base from x = -1.00 to -0.15 m, base travel 1.25 m,
+joint travel per joint [deg] = [162, 214, 247, 81, 0, 162],
+min sigma_min(J_red) along the schedule = 0.172
+```
+
+The red line in the figure is the schedule of the best branch (thin red: the other feasible branches). The
+base climbs with the tool during the first long side, waits near x = 0 during the short side and the start
+of the return, then steps back to -0.15 m.
+
+#### 5.5 Findings
+
+- The base position decides which branches exist at a given path point (the width and position of the
+  green band differ per branch) and whether a continuous execution is possible at all: six of the eight
+  branches admit a complete schedule, none admits a parked base.
+- Two branches, S+ W+ E- and S- W+ E+, are mostly green yet have no schedule. Along the path one of their
+  joints (q4, and q2 for the second) runs through 180 deg. Each dot is inside +/- pi, so the map shows no
+  defect, but a path cannot cross the +/- pi seam. The joint-limit convention acts as a path constraint, not
+  as a filter on the dots.
+- The planner is fully analytical: every configuration on the red line is a closed-form IK root, the
+  Jacobian enters only through the sigma_min check. A greedy planner that keeps the base at x = -1.0 m
+  loses the pose at s = 0.23, when the tool leaves the arm's reach.
