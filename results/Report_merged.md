@@ -478,6 +478,12 @@ same label in 99.72 % of 194256 steps;  the 545 switches, by closest singular fa
   shoulder (rho = 0) 68.4 %    wrist (sin q5 = 0) 23.9 %    elbow (sin q3 = 0) 7.7 %
 ```
 
+**Vectorised version.** `scripts/ik_ur12e.py` solves one pose per call, which is enough for the maps of
+section 4 (about 34 000 calls per map). `drafts/ik_ur12e_full.py` implements the same three groups vectorised over
+arrays of poses (all 8 sign combinations at once, no loop over poses). It runs at about 59 000 poses/s with 8
+branches each, recovers the original configuration on 200 000 random samples (worst error 2.4e-10 rad), and gives
+the same 8 solutions as the table in 3.8.
+
 Labels change only next to a singular surface, where two branches meet. A path planner therefore follows a
 branch by continuity and monitors sigma_min; the label alone is not enough (section 5).
 
@@ -744,6 +750,8 @@ S- W- E-   |  44 % done, s = 0.45: no root (out of reach)    |  17 % done, s = 0
 label persistence on these runs: the nearest root has the same label in 100 % of 1164 steps
 ```
 
+<img src="figures/s5_fixed_x_baseline.png" width="100%">
+
 There are only two failure causes on this path: the tool leaves the reach band (elbow family, the root
 disappears), or a joint reaches the ±π seam. No branch stops on a singularity, because tool-down keeps q5 at ±90°
 and the rectangle stays outside the shoulder hole (see 5.2). Since no branches merge, the analytical labels
@@ -836,3 +844,56 @@ greedy, max sigma_min       1.00      3.90 m        1.25         7.0 deg        
   expensive and either rides the reach boundary or wanders. With a base slower than about 0.6× the tool speed,
   greedy fails where the DP succeeds. The reason is visible in the (s, x) map: the base must commit early to pass
   above a grey wedge, and no one-step rule can see the wedge.
+
+## Conclusion
+
+**How does the base position x select among the IK branches?** With x fixed, the P6R is a UR12e with a shifted
+target. The analytical IK (section 3) splits into three groups, which are the three blocks of 3J5 (2.2). Each group
+has two roots, so there are at most 8 branches, and the places where a pair of roots merges are exactly the zeros
+of det J_red = a2 a3 sin q3 sin q5 rho. Moving the base translates these critical curves in the world. A world
+target therefore gains or loses branches as x changes, and always in pairs. For the pose of 1.4 there are 0
+branches below x = 0.13 m, 4 up to 0.38 m, and 8 above. On the maps (section 4), a third of a 3 m task strip is
+covered by one base position only. The redundancy also matters for singularities: the slide restores rank for
+most shoulder and elbow singular configurations (88–96 % of the singular cells), but for only about 12 % of the
+wrist ones, because a prismatic joint cannot supply a lost rotation (2.3, 4.6).
+
+**How can x and the branch be planned jointly?** For a Cartesian path, every branch defines its own admissible
+region in the (s, x) plane (section 5). A continuous execution is a curve through that region whose slope
+dx/ds is bounded by the base speed. Parked at the start position x(0) = -1 m, every branch stops by s = 0.24. A
+parked base works only in a 20 cm corridor around x = 0, on three branches. Two branches have no schedule at all,
+because a joint must cross the ±π seam. Dynamic programming over the (s, x) graph finds a complete schedule on 6 of
+8 branches. Greedy continuation, which picks x one step at a time, completes the same branches when the base is
+fast, but costs 10–46 % more and either runs along the reach boundary (sigma_min down to 0.033) or moves the base
+far more than needed. When the base is slower than about 0.6× the tool speed, greedy fails where the DP succeeds:
+the base must start moving early to pass above a non-admissible wedge, and no one-step rule can see the wedge
+coming.
+
+## Limitations
+
+- **No collision model.** The IK and the maps check reachability and regularity only. For the pose of 1.4, two of
+  the 8 solutions pass through the UMR deck (3.7).
+- **Joint limits ±π.** This project convention gives one candidate per branch but creates the ±π seam that removes
+  two branches from the path. The real UR12e limits (±2π, elbow ±π) would change that result.
+- **Mount geometry.** The mount position (`scripts/umr_params.py`) is a placeholder until measured. The older
+  `p6r/` package and `sim/umr_ur12e_sim.urdf` use a 0.41 m mount and a different base yaw, and do not match this
+  report's model.
+- **Base along X only.** The real UMR is omnidirectional (x, y, yaw). Here one redundant coordinate was studied.
+- **Singularity threshold.** sigma_min mixes metres and radians, so the threshold is scale-dependent. The
+  sensitivity check in 4.6 shows the singular class stays a thin band around the same critical curves.
+- **Discretisation.** The path is sampled every 4 cm and x every 5 cm (finer in the speed study), and motion between
+  samples is not checked. The planner's cost is joint and base travel, not time, and the base speed enters only as
+  the slope bound dx/ds.
+
+## References
+
+1. ENG-654 Kinematics-Grounded Motion Planning for Robots, EPFL LASA, lecture notes, simulators and playgrounds.
+   https://epfl-lasa.github.io/eng-654/
+2. K. P. Hawkins, *Analytic Inverse Kinematics for the Universal Robots UR-5/UR-10 Arms*, Georgia Institute of
+   Technology, technical report, 2013.
+3. D. L. Pieper, *The Kinematics of Manipulators under Computer Control*, PhD thesis, Stanford University, 1968.
+4. K. M. Lynch and F. C. Park, *Modern Robotics: Mechanics, Planning, and Control*, Cambridge University Press,
+   2017 (product of exponentials, screw axes, geometric Jacobian).
+5. Universal Robots, UR12e kinematic parameters and ROS description package (`ur12e/config/ur12e/*.yaml`,
+   `ur12e/urdf/` in this repository).
+6. AgileX Robotics UMR datasheet and product pages (sources listed in `scripts/umr_params.py`).
+

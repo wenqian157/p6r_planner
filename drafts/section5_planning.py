@@ -322,4 +322,26 @@ for ax in axs:
         ax.axvline(sc, color="#bbb", lw=0.6, ls=":")
 fig.suptitle(f"Execution profiles on branch {LABELS[b_best]}: branch-aware DP vs greedy continuations", fontsize=11)
 fig.savefig(OUT / f"s5_profiles{TAG}.png", dpi=140); plt.close(fig)
+
+# (c) fixed-x baseline (5A): how far each branch gets with the base parked, and why it stops
+REASON_COL = {"completes": "#2ca25f", "no root": "#9e9e9e", "seam": "#ff7f0e", "singular": "#d62728", "other": "#7b3294"}
+def reason_key(msg):
+    return ("completes" if msg == "completes" else "no root" if "no root" in msg else
+            "seam" if "seam" in msg else "singular" if "singular" in msg else "other")
+fig, axs = plt.subplots(1, 2, figsize=(13, 3.8), sharey=True, constrained_layout=True)
+for ax, x0 in zip(axs, (0.0, X_START)):
+    for b in range(NB):
+        frac, msg = run_fixed(b, x0)
+        k = reason_key(msg)
+        ax.barh(b, frac, color=REASON_COL[k], height=0.7)
+        ax.text(min(frac, 1) + 0.01, b, "done" if k == "completes" else f"s = {frac:.2f}", va="center", fontsize=8)
+    for sc in S_CORNERS:
+        ax.axvline(sc, color="#bbb", lw=0.6, ls=":")
+    ax.set_xlim(0, 1.12); ax.set_title(f"base parked at x = {x0:+.1f} m"); ax.set_xlabel("path progress s reached")
+axs[0].set_yticks(range(NB)); axs[0].set_yticklabels(LABELS); axs[0].invert_yaxis()
+fig.legend(handles=[plt.Rectangle((0, 0), 1, 1, color=REASON_COL[k]) for k in ("completes", "no root", "seam")],
+           labels=["completes the path", "stops: no root (out of reach)", "stops: joint reaches the +-pi seam"],
+           loc="lower center", ncol=3, fontsize=9, bbox_to_anchor=(0.5, -0.12))
+fig.suptitle("Fixed-x baseline: one continuation per branch from s = 0 (dotted: rectangle corners)", fontsize=11)
+fig.savefig(OUT / f"s5_fixed_x_baseline{TAG}.png", dpi=150, bbox_inches="tight"); plt.close(fig)
 print(f"\nfigures: {OUT / f's5_sx_map_dp_vs_greedy{TAG}.png'}, {OUT / f's5_profiles{TAG}.png'}")

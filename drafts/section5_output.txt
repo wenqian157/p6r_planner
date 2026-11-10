@@ -1,4 +1,4 @@
-(s, x) map: 111 x 41 points, 8 branches, 9 s  (settings of scripts/step07_sx_map.py)
+(s, x) map: 111 x 41 points, 8 branches, 8 s  (settings of scripts/step07_sx_map.py)
 
 5A  fixed-x baseline: one continuation per admissible root at s = 0, base parked
     branch     | x = 0 m                                                    | x = -1 m
