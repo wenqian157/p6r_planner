@@ -146,62 +146,157 @@ DH table vs PoE                 1.22e-15               2.51e-14
 Verdict: the three models agree (tolerance 1e-09 m, 1e-06 deg).
 
 ### 2. Jacobians
-#### 2.1 Full 6 x 7 Jacobian J and Reduced 6 x 6 Jacobian J_red
-With a given posture, a full 6 x 7 Jacobian (J) and a reduced 6 x 6 Jacobian (J_red) are built.
-
-Full 6 x 7 Jacobian at x = 0.5 m, q = [10, -60, 90, -120, -90, 30] deg
+#### Symbolic Jacobians of the P6R: 0J6 (J_red) and the full 6 x 7 J
 
 ```text
-         x       q1       q2       q3       q4       q5       q6
-vx  1.0000  -0.3315   0.1263  -0.3962  -0.1148  -0.0202   0.0000
-vy  0.0000   0.8769   0.0223  -0.0699  -0.0202   0.1148   0.0000
-vz  0.0000   0.0000  -0.9212  -0.6148  -0.1198   0.0000  -0.0000
-wx  0.0000   0.0000  -0.1736  -0.1736  -0.1736   0.9848  -0.0000
-wy  0.0000   0.0000   0.9848   0.9848   0.9848   0.1736   0.0000
-wz  0.0000   1.0000   0.0000   0.0000   0.0000  -0.0000  -1.0000
+1. 0J6: arm Jacobian in DH frame 0 of the arm
+  column q1:
+     vx: -a2*sin(q1)*cos(q2) - a3*sin(q1)*cos(q2 + q3) + d4*cos(q1) - d5*sin(q1)*sin(q2 + q3 + q4) + d6*sin(q1)*sin(q5)*cos(q2 + q3 + q4) + d6*cos(q1)*cos(q5)
+     vy: a2*cos(q1)*cos(q2) + a3*cos(q1)*cos(q2 + q3) + d4*sin(q1) + d5*sin(q2 + q3 + q4)*cos(q1) + d6*sin(q1)*cos(q5) - d6*sin(q5)*cos(q1)*cos(q2 + q3 + q4)
+     vz: 0
+     wx: 0
+     wy: 0
+     wz: 1
+  column q2:
+     vx: (-a2*sin(q2) - a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*cos(q1)
+     vy: (-a2*sin(q2) - a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*sin(q1)
+     vz: a2*cos(q2) + a3*cos(q2 + q3) + d5*sin(q2 + q3 + q4) - d6*sin(q5)*cos(q2 + q3 + q4)
+     wx: sin(q1)
+     wy: -cos(q1)
+     wz: 0
+  column q3:
+     vx: (-a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*cos(q1)
+     vy: (-a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*sin(q1)
+     vz: a3*cos(q2 + q3) + d5*sin(q2 + q3 + q4) - d6*sin(q5)*cos(q2 + q3 + q4)
+     wx: sin(q1)
+     wy: -cos(q1)
+     wz: 0
+  column q4:
+     vx: (d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*cos(q1)
+     vy: (d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*sin(q1)
+     vz: d5*sin(q2 + q3 + q4) - d6*sin(q5)*cos(q2 + q3 + q4)
+     wx: sin(q1)
+     wy: -cos(q1)
+     wz: 0
+  column q5:
+     vx: -d6*(sin(q1)*sin(q5) + cos(q1)*cos(q5)*cos(q2 + q3 + q4))
+     vy: d6*(-sin(q1)*cos(q5)*cos(q2 + q3 + q4) + sin(q5)*cos(q1))
+     vz: -d6*sin(q2 + q3 + q4)*cos(q5)
+     wx: sin(q2 + q3 + q4)*cos(q1)
+     wy: sin(q1)*sin(q2 + q3 + q4)
+     wz: -cos(q2 + q3 + q4)
+  column q6:
+     vx: 0
+     vy: 0
+     vz: 0
+     wx: sin(q1)*cos(q5) - sin(q5)*cos(q1)*cos(q2 + q3 + q4)
+     wy: -sin(q1)*sin(q5)*cos(q2 + q3 + q4) - cos(q1)*cos(q5)
+     wz: -sin(q5)*sin(q2 + q3 + q4)
 ```
-
-Reduced 6 x 6 Jacobian, x fixed, q = [10, -60, 90, -120, -90, 30] deg
-
 ```text
-         q1       q2       q3       q4       q5       q6
-vx  -0.3315   0.1263  -0.3962  -0.1148  -0.0202   0.0000
-vy   0.8769   0.0223  -0.0699  -0.0202   0.1148   0.0000
-vz   0.0000  -0.9212  -0.6148  -0.1198   0.0000  -0.0000
-wx   0.0000  -0.1736  -0.1736  -0.1736   0.9848  -0.0000
-wy   0.0000   0.9848   0.9848   0.9848   0.1736   0.0000
-wz   1.0000   0.0000   0.0000   0.0000  -0.0000  -1.0000
+2. WJ6 = J_red: the same arm Jacobian in the world frame
+
+  WJ6 = blockdiag(R0, R0) 0J6,  R0 = Rz(pi) = rotation of DH frame 0 in the world (base_link_inertia yaw)
+  -> every column has its rows vx, vy, wx, wy negated; vz, wz unchanged.
+  column q1:
+     vx: a2*sin(q1)*cos(q2) + a3*sin(q1)*cos(q2 + q3) - d4*cos(q1) + d5*sin(q1)*sin(q2 + q3 + q4) - d6*sin(q1)*sin(q5)*cos(q2 + q3 + q4) - d6*cos(q1)*cos(q5)
+     vy: -a2*cos(q1)*cos(q2) - a3*cos(q1)*cos(q2 + q3) - d4*sin(q1) - d5*sin(q2 + q3 + q4)*cos(q1) - d6*sin(q1)*cos(q5) + d6*sin(q5)*cos(q1)*cos(q2 + q3 + q4)
+     vz: 0
+     wx: 0
+     wy: 0
+     wz: 1
+  column q2:
+     vx: -(-a2*sin(q2) - a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*cos(q1)
+     vy: -(-a2*sin(q2) - a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*sin(q1)
+     vz: a2*cos(q2) + a3*cos(q2 + q3) + d5*sin(q2 + q3 + q4) - d6*sin(q5)*cos(q2 + q3 + q4)
+     wx: -sin(q1)
+     wy: cos(q1)
+     wz: 0
+  column q3:
+     vx: -(-a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*cos(q1)
+     vy: -(-a3*sin(q2 + q3) + d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*sin(q1)
+     vz: a3*cos(q2 + q3) + d5*sin(q2 + q3 + q4) - d6*sin(q5)*cos(q2 + q3 + q4)
+     wx: -sin(q1)
+     wy: cos(q1)
+     wz: 0
+  column q4:
+     vx: -(d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*cos(q1)
+     vy: -(d5*cos(q2 + q3 + q4) + d6*sin(q5)*sin(q2 + q3 + q4))*sin(q1)
+     vz: d5*sin(q2 + q3 + q4) - d6*sin(q5)*cos(q2 + q3 + q4)
+     wx: -sin(q1)
+     wy: cos(q1)
+     wz: 0
+  column q5:
+     vx: d6*(sin(q1)*sin(q5) + cos(q1)*cos(q5)*cos(q2 + q3 + q4))
+     vy: -d6*(-sin(q1)*cos(q5)*cos(q2 + q3 + q4) + sin(q5)*cos(q1))
+     vz: -d6*sin(q2 + q3 + q4)*cos(q5)
+     wx: -sin(q2 + q3 + q4)*cos(q1)
+     wy: -sin(q1)*sin(q2 + q3 + q4)
+     wz: -cos(q2 + q3 + q4)
+  column q6:
+     vx: 0
+     vy: 0
+     vz: 0
+     wx: -sin(q1)*cos(q5) + sin(q5)*cos(q1)*cos(q2 + q3 + q4)
+     wy: sin(q1)*sin(q5)*cos(q2 + q3 + q4) + cos(q1)*cos(q5)
+     wz: -sin(q5)*sin(q2 + q3 + q4)
 ```
-
-#### 2.2 Subchain Jacobian 3J5 of the arm (x fixed)
-
 ```text
-x = 0.5 m,  arm q = [10, -60, 90, -120, -90, 30] deg,  velocity point O5,  frame = UR DH frame 3
+3. WJ: whole-body Jacobian (6 x 7) in the world frame, columns (x, q1..q6) 
+  WJ = [ e | WJ6 ],   e = [1 0 0 0 0 0]^T: the slide column is pure x translation and contains no q.
+  J_red = WJ[:, 1:] = WJ6 (x fixed).
 
-3J5 =
-               q1       q2       q3   |       q4       q5       q6
-  vx       0.1508  -0.6726  -0.0599   |  -0.0599   0.0000  -0.0000
-  vy      -0.0871  -0.6753  -0.6753   |  -0.1038   0.0000   0.0000
-  vz       0.9212  -0.0000   0.0000   |  -0.0000   0.0000  -0.0000
-       -----------------------------+---------------------------
-  wx       0.5000  -0.0000  -0.0000   |  -0.0000  -0.8660  -0.5000
-  wy       0.8660   0.0000   0.0000   |   0.0000   0.5000  -0.8660
-  wz       0.0000   1.0000   1.0000   |   1.0000  -0.0000  -0.0000
-
-           [   A   |   C   ]
-           [   B   |   W   ]
-
-det A           =    0.3812      (A = 3J5[0:3, 0:3], how q1..q3 move O5)
-det W           =    1.0000      (W = 3J5[3:6, 3:6], how q4..q6 rotate the tool)
-det A * det W   =    0.3812
-det 3J5         =    0.3226
-det 0J_red      =    0.3226      (same as det 3J5: point shift and rotation have unit det)
-
-C = 3J5[0:3, 3:6] column norms = [0.1199 0.     0.    ]
-C is not 0: column q4 still moves O5 by 0.1199 m per rad (= d5, the wrist offset).
-So 3J5 is NOT block triangular and det 3J5 = det A * det(W - B A^-1 C), not det A * det W.
-check:  det A * det(W - B A^-1 C) =    0.3226
 ```
+
+
+
+#### 2.2 Decoupling 3J5 of the UR12e: 1 + 3 + 2: plane split instead of wrist split (x fixed)
+```text
+
+Axes 2, 3, 4 are parallel, so joints q2, q3, q4 form a planar 3R inside the arm plane: they slide O5 within the plane and rotate about its normal, nothing else. Joint q1 turns the plane about the vertical, joints q5, q6 tilt the tool out of the plane and meet at O5. With the velocity point at O5 and the components expressed in frame 3 (x, y in the plane, z along its normal), reorder rows and columns:
+
+   rows:     in-plane motion (vx, vy, wz) | out-of-plane translation (vz) | out-of-plane rotation (wx, wy)
+   columns:  planar group (q2, q3, q4)    | shoulder (q1)                 | wrist (q5, q6)
+
+                     q2 q3 q4   |   q1   |  q5  q6
+   vx vy wz      [     P        |   *    |    *     ]
+   vz            [     0        |  -rho  |    0     ]
+   wz wy ->      [     0        |   *    |    W2    ]
+   (wx wy)
+
+   P  = [ a2 s3 + d5 c4       d5 c4       d5 c4 ]        planar 3R at O5
+        [ a2 c3 + a3 + d5 s4  a3 + d5 s4  d5 s4 ]
+        [ 1                   1           1     ]
+
+   rho = a2 c2 + a3 c23 + d5 s234                        in-plane radial coordinate of O5
+
+   W2 = [  s4   -s5 c4 ]                                 out-of-plane rotations from q5, q6
+        [ -c4   -s5 s4 ]
+
+The zeros: the parallel joints produce no vz, wx, wy; the wrist joints do not move O5.  The matrix is block
+triangular, so
+
+   det 3J5 = det P * (-rho) * det W2 = (a2 a3 sin q3) * (-rho) * (-sin q5)
+           = a2 a3 sin q3 sin q5 (a2 c2 + a3 c23 + d5 s234)
+
+Three blocks, three families, and the three groups of the analytical IK:
+
+   block  size  joints      vanishes when                family     IK group
+   P      3x3   q2 q3 q4    sin q3 = 0                   elbow      planar 3R, elbow up/down
+   rho    1x1   q1          a2 c2 + a3 c23 + d5 s234 = 0 shoulder   q1 from O5, left/right
+   W2     2x2   q5 q6       sin q5 = 0                   wrist      q5, q6 from orientation, flip
+```
+```text
+Three families, one block each:
+   - planar arm block P         sin q3 = 0     elbow family
+   - shoulder entry rho         rho = 0        shoulder family: the only entry that moves O5 out of the
+                                               plane direction vanishes (O5 above the shoulder line)
+   - wrist 2x2 in Q             sin q5 = 0     wrist family: out-of-plane rotations from q5, q6 collapse
+```
+<img src="figures/elbow_s.png" width="32%">
+<img src="figures/shoulder_s.png" width="32%">
+<img src="figures/wrist_s.png" width="32%">
+
 
 #### 2.3 Reduced J_red vs full J at representative configurations
 
@@ -274,9 +369,117 @@ Elbow vertical (type B):   x = 0.5 m,  q = [  0 -90   0   0 -90   0] deg
 
 ### 3. Analytical IK solver
 
+Megi
 
 ### 4. Reachable-position maps over discrete base positions
+#### 4.1 Reachable-position maps, joint limits +/- pi
 
+The maps show the geometric branch count: every joint angle is wrapped to (-pi, pi), so a configuration and its +/- 2 pi copie from UR12e are counted once. The UR12e's own limits (+/- 2 pi on all joints, +/- pi on the elbow) are never tighter than 180 deg, so they remove no geometric branch and the count needs no further filtering.  Any tighter limit would act as a filter on the same grid, lowering the count where a branch leaves the allowed interval.
+
+![reach map x = 0](figures/reach_map_x0.png)
+```text
+flange orientation R (world), columns = flange axes:
+[[ 0.  0.  1.]
+ [ 0.  1.  0.]
+ [-1.  0.  0.]]
+
+flange height z = 0.9 m  (arm base at 0.42 m, shoulder axis at 0.6007 m)
+
+grid: x_w in [-2.4, 2.4] m, y_w in [-1.4, 1.4] m, step 0.02 m, 241 x 141 = 33981 IK calls per map, 40 s for 3 maps
+```
+#### 4.2 Reachable-position maps with discrete base x
+![reach maps](figures/reach_maps_x.png)
+
+```text
+base at x = -1.0 m: 0 IK: 22129 pts, 4 IK: 4176 pts, 8 IK: 7676 pts;  reachable radius from axis 1: 0.179 .. 1.241 m
+
+base at x = +0.0 m: 0 IK: 22129 pts, 4 IK: 4176 pts, 8 IK: 7676 pts;  reachable radius from axis 1: 0.179 .. 1.241 m
+
+base at x = +1.0 m: 0 IK: 22129 pts, 4 IK: 4176 pts, 8 IK: 7676 pts;  reachable radius from axis 1: 0.179 .. 1.241 m
+```
+reading: 
+- the count is constant on regions bounded by the images of the three singular families:
+
+    - Outer boundary: elbow family (arm stretched)---0 IK  
+    - Inner hole of radius d4 = 0.174 m: shoulder family(O5 cannot come closer to axis 1 than the arm-plane offset)---0 IK  
+    - Inside r = 1.0 m all 8 branches exist---8 IK
+    - In the ring 1.0 .. 1.24 m only one wrist choice keeps O4 within the planar 2R reach---4 IK
+
+- Moving the base translates the whole map: the slide adds reach only along x.
+
+#### 4.3 Out of curiosity, Reachable-position maps with different flange orientation 
+![reach maps](figures/reach_map_x0_tilt.png)
 
 ### 5. Cartesian path and the (s, x) redundancy plane
 
+(the final chart will hit the a wall)
+
+With x fixed the robot is a 6R arm with at most 8 IK branches. Letting x vary turns every branch into a one-parameter family of solutions. The redundancy is drawn as a
+map with the path progress s on the horizontal axis and the redundant joint, here the base position x, on the vertical axis. Every dot is one analytical IK evaluation.
+
+#### 5.1 Path
+
+A closed rectangle in the horizontal plane, tool axis pointing down, longer than the arm can reach from one base position, so the base has to move:
+
+```text
+corners (x_w, y_w)   (-0.8, 0.25) -> (0.8, 0.25) -> (0.8, 0.85) -> (-0.8, 0.85) -> back     
+flange height        z = 0.9 m
+orientation          flange outward normal (axis 6) pointing down, flange z along +x_w
+s                    arc length over the 4.4 m perimeter, 111 samples
+x                    base position, -1.0 .. 1.0 m, step 0.05 m (41 positions)
+```
+
+#### 5.2 Classification of one dot
+
+For each (s, x) the analytical IK of the arm is run with the base at x. A branch gets a green dot when it has a root and the fixed-x arm is regular, sigma_min(J_red) >= 0.03; otherwise grey (no root, or the root is singular). Joint limits are +/- pi, so no root is lost to limits. On this path the singular classes stay empty: the tool-down orientation keeps q5 at +/- 90 deg, far from the wrist family, and the rectangle stays
+outside the shoulder hole of radius d4. The only family touched is the elbow, at the edge of the reach band, where the root disappears at the same place.
+
+#### 5.3 Map
+
+<img src="figures/sx_map.png" width="100%">
+
+One panel per branch. The green band follows the x coordinate of the tool along the rectangle: it rises on the first long side and falls on the return. No horizontal line stays green in any panel, so a parked base cannot execute this path.
+
+
+#### 5.4 Base schedule x(s), analytical planning
+
+Within one branch the green dots form a layered graph over s. Two dots in neighbouring layers are connected when the base moves at most 0.05 m and every joint moves at most 0.5 rad, measured on the unwrapped angles so that a jump across +/- pi is rejected. Dynamic programming returns the cheapest complete schedule from the fixed start x(0) = -1.0 m with
+
+```text
+cost = sum over steps of ( |dq|_2 [rad]  +  2 * |dx| [m] )
+```
+
+i.e. joint travel plus a penalty on base travel; it is a distance, not a time.
+
+```text
+branch     plan cost   x range of the schedule
+S+ W+ E+      11.79    [-1.00, +0.40] m
+S+ W+ E-       none    q4 crosses +/- pi along the path
+S+ W- E+      10.31    [-1.00, +0.05] m      <- best
+S+ W- E-      10.51    [-1.00, +0.05] m
+S- W+ E+       none    q2 and q4 cross +/- pi along the path
+S- W+ E-      11.04    [-1.00, +0.10] m
+S- W- E+      12.97    [-1.00, +0.50] m
+S- W- E-      12.76    [-1.00, +0.45] m
+
+best branch S+ W- E+: base from x = -1.00 to -0.15 m, base travel 1.25 m,
+joint travel per joint [deg] = [162, 214, 247, 81, 0, 162],
+min sigma_min(J_red) along the schedule = 0.172
+```
+
+The red line in the figure is the schedule of the best branch (thin red: the other feasible branches). The
+base climbs with the tool during the first long side, waits near x = 0 during the short side and the start
+of the return, then steps back to -0.15 m.
+
+#### 5.5 Findings
+
+- The base position decides which branches exist at a given path point (the width and position of the
+  green band differ per branch) and whether a continuous execution is possible at all: six of the eight
+  branches admit a complete schedule, none admits a parked base.
+- Two branches, S+ W+ E- and S- W+ E+, are mostly green yet have no schedule. Along the path one of their
+  joints (q4, and q2 for the second) runs through 180 deg. Each dot is inside +/- pi, so the map shows no
+  defect, but a path cannot cross the +/- pi seam. The joint-limit convention acts as a path constraint, not
+  as a filter on the dots.
+- The planner is fully analytical: every configuration on the red line is a closed-form IK root, the
+  Jacobian enters only through the sigma_min check. A greedy planner that keeps the base at x = -1.0 m
+  loses the pose at s = 0.23, when the tool leaves the arm's reach.
