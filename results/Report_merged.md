@@ -487,7 +487,18 @@ Module 3, which computes forward kinematics with its own code. All 8 show 0.000 
 `sim/umr_ur12e_sim.urdf` mounts the arm 1 cm lower and rotated by π about axis 1, so it does not match this
 report's model; the corrected copy matches the URDF chain to 6e-10.
 
-<!-- TODO Megi: insert the Module 3 screenshot here -->
+<img src="figures/module3_ik_solutions.png" width="100%">
+
+Module 3 with `drafts/sim/umr_ur12e_sim_report.urdf`, end-effector link `tool0`, target typed as
+(1.3769, 0.3315, 0.729) m, roll/pitch/yaw = (180, 0, 110)°. Top: all 8 ghosts and the error table; bottom: each
+solution alone, numbered as the rows of `m3_section3_pose.csv` (same order as the table in 3.8). The common
+0.055 mm is the rounding of the typed target to 4 decimals (exact target (1.376941, 0.331465, 0.728989) m: the
+difference is 0.055 mm). It is the same for every row, so it is not an IK error; the orientation error is 0.0000°.
+**Collisions are not part of the IK.** Approximating the arm by the polyline through its joint origins, the lowest
+point above the UMR deck footprint (top at z = 0.41 m) is: solutions 1, 3, 6, 8 +19 cm; 2 +11 cm; 7 +10 cm;
+4 -1 cm; 5 -4 cm. With link radii of about 6-7.5 cm, solutions **4 and 5 pass through the base**, and 2 and 7 clear
+it by only a few centimetres. All 8 are valid IK solutions, but only about half are physically usable from this
+base position. A collision check (not part of this project) would remove 4 and 5.
 
 #### 3.8 All solutions of one tool pose
 
