@@ -22,7 +22,12 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from ik_ur12e import d1, a2, a3, d4, d5, d6, T06_from_world, fk_rows, step1_theta1   # her step 1
+from ik_ur12e import d1, a2, a3, d4, d5, d6, T06_from_world, fk_rows
+try:                                                     # older scripts/ik_ur12e.py (step 1 only)
+    from ik_ur12e import step1_theta1
+except ImportError:                                      # newer version: group1_shoulder returns [(label, q1)]
+    from ik_ur12e import group1_shoulder
+    step1_theta1 = lambda T: [q for _, q in group1_shoulder(T)]
 from fk_dh import dh_row, origin
 from fk_urdf_p6r import fk as fk_p6r                    # independent reference model (URDF chain)
 from jacobian_p6r import jacobian, jacobian_reduced

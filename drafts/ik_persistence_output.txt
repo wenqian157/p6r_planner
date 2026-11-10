@@ -1,0 +1,5 @@
+label persistence: nearest root at the next step has the same label in 99.72 % of 194256 steps
+the 545 switches, by closest singular family (smallest normalised det factor):
+  shoulder (rho = 0)  :  68.4 %
+  elbow (sin q3 = 0)  :   7.7 %
+  wrist (sin q5 = 0)  :  23.9 %

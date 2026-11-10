@@ -9,6 +9,7 @@ of the IK formulas (= the factors of det J_red).
 Run from the repo root:   python drafts/maps_section4.py
 Outputs: drafts/figures/map_*.png, drafts/maps_section4_output.txt (stdout)
 """
+import os
 import sys
 import time
 from pathlib import Path
@@ -31,7 +32,8 @@ CLASS = ["feasible", "no real IK", "joint limit", "singular"]
 CMAP = ListedColormap(["#2e7d32", "#e0e0e0", "#f9a825", "#c62828"])
 
 # ------------------------------------------------------------------ map settings (choices to discuss)
-Z_MAP = 0.60                          # flange height of the map plane [m] (~ shoulder height 0.42 + 0.18)
+Z_MAP = float(os.environ.get("S4_Z", 0.60))   # flange height of the map plane [m]; report uses 0.9 (as step 06)
+TAG = os.environ.get("S4_TAG", "")
 SIG_EPS = 0.05                        # regularity threshold on sigma_min(J_red)
 XS = [-1.0, 0.0, 1.0]                 # base positions of the proposal
 H = 0.02                              # grid step [m]
@@ -233,7 +235,7 @@ if __name__ == "__main__":
                    ncol=7, fontsize=9, frameon=False)
         fig.suptitle(f"Branch-resolved reachable positions, tool {oname}, flange at z = {Z_MAP} m, base at x = 0 "
                      f"(singular: sigma_min(J_red) < {SIG_EPS})", fontsize=12)
-        fig.tight_layout(rect=(0, 0.04, 1, 1)); fig.savefig(OUT / f"map_{oname}_branches_x0.png", dpi=120); plt.close(fig)
+        fig.tight_layout(rect=(0, 0.04, 1, 1)); fig.savefig(OUT / f"map_{oname}_branches_x0{TAG}.png", dpi=120); plt.close(fig)
 
         # ---------------- figure B: world overlay x = -1, 0, +1 (number of feasible branches) + union
         fig, axs = plt.subplots(2, 2, figsize=(13, 7.6), sharex=True, sharey=True)
@@ -253,7 +255,7 @@ if __name__ == "__main__":
         axs[3].add_patch(Rectangle((TASK[0], TASK[2]), TASK[1] - TASK[0], TASK[3] - TASK[2], fill=False, ec="w", lw=1.5))
         axs[3].set_title("overlay: red x=-1, green x=0, blue x=+1\n(mixtures = covered by several x)", fontsize=10)
         fig.suptitle(f"World-frame overlay, tool {oname}, z = {Z_MAP} m (red/white box: task region)")
-        fig.savefig(OUT / f"map_{oname}_overlay.png", dpi=120, bbox_inches="tight"); plt.close(fig)
+        fig.savefig(OUT / f"map_{oname}_overlay{TAG}.png", dpi=120, bbox_inches="tight"); plt.close(fig)
 
         # ---------------- figure C: sigma_min(J_red) vs sigma_min(J) for one branch, x = 0
         b = 2   # S+ W- E+  (the branch of the section 1-2 configuration)
@@ -263,7 +265,7 @@ if __name__ == "__main__":
             ax.contour(GX, GY, np.nan_to_num(F, nan=1), [SIG_EPS], colors="r", linewidths=0.8)
             ax.set_title(f"{LABELS[b]}, tool {oname}:\n{t}", fontsize=10); ax.set_xlabel("world X [m]"); ax.set_aspect("equal")
         axs[0].set_ylabel("world Y [m]"); fig.colorbar(im, ax=axs, shrink=0.85)
-        fig.savefig(OUT / f"map_{oname}_sigma_{b}.png", dpi=120, bbox_inches="tight"); plt.close(fig)
+        fig.savefig(OUT / f"map_{oname}_sigma_{b}{TAG}.png", dpi=120, bbox_inches="tight"); plt.close(fig)
 
     # (5) threshold sensitivity (tool down, x = 0)
     print("\n(5) sensitivity of the singular class to the threshold (tool down, x = 0, all branches)")

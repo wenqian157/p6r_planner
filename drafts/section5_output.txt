@@ -1,0 +1,38 @@
+(s, x) map: 111 x 41 points, 8 branches, 9 s  (settings of scripts/step07_sx_map.py)
+
+5A  fixed-x baseline: one continuation per admissible root at s = 0, base parked
+    branch     | x = 0 m                                                    | x = -1 m
+    S+ W+ E+   |  44 % done, stops at s = 0.45: no root (out of reach)      |  17 % done, stops at s = 0.18: no root (out of reach)
+    S+ W+ E-   |   8 % done, stops at s = 0.09: q4 reaches the +-pi seam (joint limit) |   5 % done, stops at s = 0.05: q4 reaches the +-pi seam (joint limit)
+    S+ W- E+   | completes                                                  |  23 % done, stops at s = 0.24: no root (out of reach)
+    S+ W- E-   | completes                                                  |  23 % done, stops at s = 0.24: no root (out of reach)
+    S- W+ E+   |   2 % done, stops at s = 0.03: q4 reaches the +-pi seam (joint limit) |   2 % done, stops at s = 0.03: q2 reaches the +-pi seam (joint limit)
+    S- W+ E-   | completes                                                  |  23 % done, stops at s = 0.24: no root (out of reach)
+    S- W- E+   |  40 % done, stops at s = 0.41: q2 reaches the +-pi seam (joint limit) |  15 % done, stops at s = 0.15: q2 reaches the +-pi seam (joint limit)
+    S- W- E-   |  44 % done, stops at s = 0.45: no root (out of reach)      |  17 % done, stops at s = 0.18: no root (out of reach)
+    label persistence on these runs: nearest root has the same label in 100.00 % of 1164 steps
+
+5B  DP reproduces the step-07 plan costs (max difference 0.005); start x = -1.0 m on every branch
+    branch     | branch-aware DP        | greedy, min step cost                                | greedy, max sigma_min
+    S+ W+ E+   | cost 11.79             | completes, cost 13.03                                | completes, cost 15.31
+    S+ W+ E-   | no schedule            | fails at s = 0.42: q4 reaches the +-pi seam (joint l | fails at s = 0.42: q4 reaches the +-pi seam (joint limit)
+    S+ W- E+   | cost 10.31             | completes, cost 15.02                                | completes, cost 14.99
+    S+ W- E-   | cost 10.51             | completes, cost 15.00                                | completes, cost 14.42
+    S- W+ E+   | no schedule            | fails at s = 0.39: q2 reaches the +-pi seam (joint l | fails at s = 0.39: q2 reaches the +-pi seam (joint limit)
+    S- W+ E-   | cost 11.04             | completes, cost 13.95                                | completes, cost 15.70
+    S- W- E+   | cost 12.97             | completes, cost 14.56                                | completes, cost 15.04
+    S- W- E-   | cost 12.76             | completes, cost 14.98                                | completes, cost 16.08
+      [min step cost] S+ W+ E-: q4 reaches the +-pi seam (joint limit)
+      [min step cost] S- W+ E+: q2 reaches the +-pi seam (joint limit)
+      [max sigma_min] S+ W+ E-: q4 reaches the +-pi seam (joint limit)
+      [max sigma_min] S- W+ E+: q2 reaches the +-pi seam (joint limit)
+    complete executions: DP 6/8,  greedy-cost 6/8,  greedy-margin 6/8
+
+5C  profiles on branch S+ W- E+ (best DP branch)
+    run                    s reached base travel max |dx/ds|  min seam margin max pos res min sig(J_red) min sig(J)
+    branch-aware DP             1.00      1.25 m        1.25          5.7 deg     1.1e-15          0.172      0.173
+    greedy, min step cost       1.00      2.00 m        1.25          4.3 deg     1.1e-15          0.033      0.173
+    greedy, max sigma_min       1.00      3.90 m        1.25          7.0 deg     9.2e-16          0.172      0.173
+    slope bound: |dx| <= 0.05 m per path step of 0.040 m  ->  |dx/ds_arc| <= 1.25  (base speed <= 1.25 x tool speed)
+
+figures: /sessions/rcw-01wr7rugeqcpzsab9o7jahzk/mnt/p6r_planner/drafts/figures/s5_sx_map_dp_vs_greedy.png, /sessions/rcw-01wr7rugeqcpzsab9o7jahzk/mnt/p6r_planner/drafts/figures/s5_profiles.png

@@ -1,0 +1,50 @@
+(s, x) map: 111 x 120 points, 8 branches, 26 s  (settings of scripts/step07_sx_map.py)
+
+5A  fixed-x baseline: one continuation per admissible root at s = 0, base parked
+    branch     | x = 0 m                                                    | x = -1 m
+    S+ W+ E+   |  44 % done, stops at s = 0.45: no root (out of reach)      |  17 % done, stops at s = 0.18: no root (out of reach)
+    S+ W+ E-   |   8 % done, stops at s = 0.09: q4 reaches the +-pi seam (joint limit) |   5 % done, stops at s = 0.05: q4 reaches the +-pi seam (joint limit)
+    S+ W- E+   | completes                                                  |  23 % done, stops at s = 0.24: no root (out of reach)
+    S+ W- E-   | completes                                                  |  23 % done, stops at s = 0.24: no root (out of reach)
+    S- W+ E+   |   2 % done, stops at s = 0.03: q4 reaches the +-pi seam (joint limit) |   2 % done, stops at s = 0.03: q2 reaches the +-pi seam (joint limit)
+    S- W+ E-   | completes                                                  |  23 % done, stops at s = 0.24: no root (out of reach)
+    S- W- E+   |  40 % done, stops at s = 0.41: q2 reaches the +-pi seam (joint limit) |  15 % done, stops at s = 0.15: q2 reaches the +-pi seam (joint limit)
+    S- W- E-   |  44 % done, stops at s = 0.45: no root (out of reach)      |  17 % done, stops at s = 0.18: no root (out of reach)
+    label persistence on these runs: nearest root has the same label in 100.00 % of 1164 steps
+
+5B  base-speed study: |dx| <= 0.0167 m per path step, x grid 0.017 m; start x = -1.0 m
+    branch     | branch-aware DP        | greedy, min step cost                                | greedy, max sigma_min
+    S+ W+ E+   | no schedule            | fails at s = 0.31: green band moved out of reach (ne | fails at s = 0.25: green band moved out of reach (nearest admissible x = -0.65 m, base at -0.68 m)
+    S+ W+ E-   | no schedule            | fails at s = 0.10: q4 reaches the +-pi seam (joint l | fails at s = 0.06: q4 reaches the +-pi seam (joint limit)
+    S+ W- E+   | cost 10.25             | fails at s = 0.50: green band moved out of reach (ne | fails at s = 0.34: green band moved out of reach (nearest admissible x = -0.53 m, base at -0.57 m)
+    S+ W- E-   | cost 10.41             | fails at s = 0.50: green band moved out of reach (ne | fails at s = 0.33: green band moved out of reach (nearest admissible x = -0.57 m, base at -0.60 m)
+    S- W+ E+   | no schedule            | fails at s = 0.04: q2 reaches the +-pi seam (joint l | fails at s = 0.03: q2 reaches the +-pi seam (joint limit)
+    S- W+ E-   | cost 11.04             | fails at s = 0.49: green band moved out of reach (ne | fails at s = 0.34: green band moved out of reach (nearest admissible x = -0.53 m, base at -0.57 m)
+    S- W- E+   | no schedule            | fails at s = 0.26: q2 reaches the +-pi seam (joint l | fails at s = 0.21: q2 reaches the +-pi seam (joint limit)
+    S- W- E-   | no schedule            | fails at s = 0.31: green band moved out of reach (ne | fails at s = 0.25: green band moved out of reach (nearest admissible x = -0.65 m, base at -0.68 m)
+      [min step cost] S+ W+ E+: green band moved out of reach (nearest admissible x = -0.40 m, base at -0.45 m)
+      [min step cost] S+ W+ E-: q4 reaches the +-pi seam (joint limit)
+      [min step cost] S+ W- E+: green band moved out of reach (nearest admissible x = -0.10 m, base at -0.13 m)
+      [min step cost] S+ W- E-: green band moved out of reach (nearest admissible x = -0.10 m, base at -0.13 m)
+      [min step cost] S- W+ E+: q2 reaches the +-pi seam (joint limit)
+      [min step cost] S- W+ E-: green band moved out of reach (nearest admissible x = -0.13 m, base at -0.16 m)
+      [min step cost] S- W- E+: q2 reaches the +-pi seam (joint limit)
+      [min step cost] S- W- E-: green band moved out of reach (nearest admissible x = -0.40 m, base at -0.45 m)
+      [max sigma_min] S+ W+ E+: green band moved out of reach (nearest admissible x = -0.65 m, base at -0.68 m)
+      [max sigma_min] S+ W+ E-: q4 reaches the +-pi seam (joint limit)
+      [max sigma_min] S+ W- E+: green band moved out of reach (nearest admissible x = -0.53 m, base at -0.57 m)
+      [max sigma_min] S+ W- E-: green band moved out of reach (nearest admissible x = -0.57 m, base at -0.60 m)
+      [max sigma_min] S- W+ E+: q2 reaches the +-pi seam (joint limit)
+      [max sigma_min] S- W+ E-: green band moved out of reach (nearest admissible x = -0.53 m, base at -0.57 m)
+      [max sigma_min] S- W- E+: q2 reaches the +-pi seam (joint limit)
+      [max sigma_min] S- W- E-: green band moved out of reach (nearest admissible x = -0.65 m, base at -0.68 m)
+    complete executions: DP 3/8,  greedy-cost 0/8,  greedy-margin 0/8
+
+5C  profiles on branch S+ W- E+ (best DP branch)
+    run                    s reached base travel max |dx/ds|  min seam margin max pos res min sig(J_red) min sig(J)
+    branch-aware DP             1.00      1.12 m        0.42          3.8 deg     1.2e-15          0.076      0.173
+    greedy, min step cost       0.49      0.87 m        0.42          3.8 deg     9.0e-16          0.048      0.173
+    greedy, max sigma_min       0.33      0.43 m        0.42          3.6 deg     1.1e-15          0.058      0.173
+    slope bound: |dx| <= 0.0167 m per path step of 0.040 m  ->  |dx/ds_arc| <= 0.42  (base speed <= 0.42 x tool speed)
+
+figures: /sessions/rcw-01wr7rugeqcpzsab9o7jahzk/mnt/p6r_planner/drafts/figures/s5_sx_map_dp_vs_greedy_slow.png, /sessions/rcw-01wr7rugeqcpzsab9o7jahzk/mnt/p6r_planner/drafts/figures/s5_profiles_slow.png
