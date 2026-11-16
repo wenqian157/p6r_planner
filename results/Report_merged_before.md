@@ -252,7 +252,6 @@ Verdict: the three models agree (tolerance 1e-09 m, 1e-06 deg).
 
 #### 2.2 Decoupling 3J5 of the UR12e: 1 + 3 + 2: plane split instead of wrist split (x fixed)
 ```text
-
 Axes 2, 3, 4 are parallel, so joints q2, q3, q4 form a planar 3R inside the arm plane: they slide O5 within the plane and rotate about its normal, nothing else. Joint q1 turns the plane about the vertical, joints q5, q6 tilt the tool out of the plane and meet at O5. With the velocity point at O5 and the components expressed in frame 3 (x, y in the plane, z along its normal), reorder rows and columns:
 
    rows:     in-plane motion (vx, vy, wz) | out-of-plane translation (vz) | out-of-plane rotation (wx, wy)
@@ -279,19 +278,12 @@ triangular, so
    det 3J5 = det P * (-rho) * det W2 = (a2 a3 sin q3) * (-rho) * (-sin q5)
            = a2 a3 sin q3 sin q5 (a2 c2 + a3 c23 + d5 s234)
 
-Three blocks, three families, and the three groups of the analytical IK:
+Three factors: sin q3(E), sin q5(S), s234(W), three blocks, three families, and the three groups of the analytical IK:
 
    block  size  joints      vanishes when                family     IK group
    P      3x3   q2 q3 q4    sin q3 = 0                   elbow      planar 3R, elbow up/down
    rho    1x1   q1          a2 c2 + a3 c23 + d5 s234 = 0 shoulder   q1 from O5, left/right
    W2     2x2   q5 q6       sin q5 = 0                   wrist      q5, q6 from orientation, flip
-```
-```text
-Three families, one block each:
-   - planar arm block P         sin q3 = 0     elbow family
-   - shoulder entry rho         rho = 0        shoulder family: the only entry that moves O5 out of the
-                                               plane direction vanishes (O5 above the shoulder line)
-   - wrist 2x2 in Q             sin q5 = 0     wrist family: out-of-plane rotations from q5, q6 collapse
 ```
 <img src="figures/elbow_s.png" width="32%">
 <img src="figures/shoulder_s.png" width="32%">
@@ -674,15 +666,12 @@ The singular class is a thin band around the critical curves whatever the thresh
 the reachable cells for 0.01 / 0.02 / 0.05 / 0.10.
 
 ### 5. Cartesian path and the (s, x) redundancy plane
-
-(the final chart will hit the a wall)
-
 With x fixed the robot is a 6R arm with at most 8 IK branches. Letting x vary turns every branch into a one-parameter family of solutions. The redundancy is drawn as a
 map with the path progress s on the horizontal axis and the redundant joint, here the base position x, on the vertical axis. Every dot is one analytical IK evaluation.
 
 #### 5.1 Path
 
-A closed rectangle in the horizontal plane, tool axis pointing down, longer than the arm can reach from one base position, so the base has to move:
+A closed rectangle in the horizontal plane, tool axis pointing down, 1.6 m long. It fits inside the reach of a base parked near x = 0 for the far-reaching branches only, and it cannot be executed from the start position x = -1.0 m without moving the base:
 
 ```text
 corners (x_w, y_w)   (-0.8, 0.25) -> (0.8, 0.25) -> (0.8, 0.85) -> (-0.8, 0.85) -> back     
@@ -699,9 +688,14 @@ outside the shoulder hole of radius d4. The only family touched is the elbow, at
 
 #### 5.3 Map
 
+a map for xy-s
 <img src="figures/sx_map.png" width="100%">
 
-One panel per branch. The green band follows the x coordinate of the tool along the rectangle: it rises on the first long side and falls on the return. From the start position x(0) = -1 m no horizontal line stays green, so the base must move; a parked base executes the path only inside a narrow corridor, x ∈ [-0.10, 0.10] m on three branches (5.6).
+One panel per branch. The green band follows the x coordinate of the tool along the rectangle: it rises on the first long side and falls on the return. A parked base is a horizontal line in the map. Only the rows x = -0.10 .. +0.10 m stay green over the whole path, and only on the four branches with the wider band (S+ W- E+, S+ W- E-, S- W+ E+, S- W+ E-); from every other base position the arm loses the pose somewhere along the rectangle.
+
+<p align="center">
+  <img src="figures/sx_map_parked.png" width="50%">
+</p>
 
 
 #### 5.4 Base schedule x(s), analytical planning
@@ -734,19 +728,38 @@ The red line in the figure is the schedule of the best branch (thin red: the oth
 base climbs with the tool during the first long side, waits near x = 0 during the short side and the start
 of the return, then steps back to -0.15 m.
 
+#### 5.5 Tilted path
+<img src="figures/tilted20x30path.png" width="50%">
+<img src="figures/sx_map_tilt_x30y20.png" width="100%">
+
+The same rectangle is placed on a plane tilted 30 deg about world x and 20 deg about world y, with the tool axis kept normal to the plane, (0.342, 0.470, -0.814) in the world; the flange height now varies from 0.66 to 1.44 m. The eight maps are no longer symmetric: the outbound and return sides differ in height and in distance from the rail, so every band is lopsided. A diagonal grey slit appears on the outbound side in all panels. It is the shoulder hole: with the tool leaning, O5 comes within d4 = 0.174 m of axis 1 when the base passes under that part of the path, and no branch has a root there. Orange dots are roots at a singular configuration (sigma_min(J_red) < 0.03): 112 on the band edges (elbow family) and 73 along the slit (shoulder family), 8 of the latter singular for the whole body; q5 stays between 54 and 126 deg, so the wrist family is not met. From x = -1.0 m only three branches keep a complete schedule (S+ W- E- at cost 11.75, S- W+ E- at 11.92, S- W- E- at 15.42), and a parked base works at x = 0.00 m only.
+
+
 #### 5.5 Findings
 
 - The base position decides which branches exist at a given path point (the width and position of the
   green band differ per branch) and whether a continuous execution is possible at all: six of the eight
-  branches admit a complete schedule, none admits a parked base.
+  branches admit a complete schedule from x = -1.0 m. Three of them (S+ W- E+, S+ W- E-, S- W+ E-) also
+  admit a parked base, for x within +/- 0.10 m. Moving the base still pays: joint travel drops from 11.7 to
+  7.8 rad and the minimum sigma_min(J_red) along the path rises from 0.115 to 0.17.
 - Two branches, S+ W+ E- and S- W+ E+, are mostly green yet have no schedule. Along the path one of their
   joints (q4, and q2 for the second) runs through 180 deg. Each dot is inside +/- pi, so the map shows no
   defect, but a path cannot cross the +/- pi seam. The joint-limit convention acts as a path constraint, not
   as a filter on the dots.
+- The map depends on the path, not only on the robot. On the tilted path the feasible branches drop from
+  six to three, the best branch changes from S+ W- E+ to S+ W- E-, and the parked window shrinks from
+  +/- 0.10 m to the single position x = 0. Which branches fail on the +/- pi seam also changes (q6 now
+  crosses it on two branches), so a branch cannot be chosen once for all tasks.
+- Three kinds of obstacle appear in the (s, x) plane. Reach limits are the band edges (elbow family). The
+  shoulder hole is an interior slit that exists only when the tool leans, and it can cut a band in two:
+  S+ W+ E+ has no schedule on the tilted path because its green region is disconnected from the start. The
+  +/- pi seam is invisible in the dots and acts on the edges between them.
+- The singular roots confirm section 2.3 on a real path: all elbow-singular dots and most shoulder-singular
+  dots keep sigma_min(J) above the threshold, so the slide can supply the lost direction; only 8 dots on
+  the slit are singular for the whole body.
 - The planner is fully analytical: every configuration on the red line is a closed-form IK root, the
   Jacobian enters only through the sigma_min check. A greedy planner that keeps the base at x = -1.0 m
   loses the pose at s = 0.23, when the tool leaves the arm's reach.
-
 #### 5.6 Fixed-x baseline: one continuation per branch
 
 With the base parked, each admissible root at s = 0 is followed along the path (step rule as in 5.4:
