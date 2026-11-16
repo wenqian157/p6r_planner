@@ -43,6 +43,19 @@ found 2, 4, 6 or 8 solutions.
 Not in general. The labels are the sign triple (sign rho, sign q5, sign q3). Physical "up/down" flips with the
 shoulder side. Sign labels are unambiguous, and they are what persists along a path.
 
+**Q7b. (TA, consultation) The UR has no shoulder–wrist decoupling, so why still call the branches shoulder / wrist / elbow?**
+What fails is the *decoupling*: there is no wrist centre positioned by q1–q3 while a spherical wrist orients the
+tool. The names are not used in that sense. The IK still has exactly three binary choices, made at the
+shoulder-pan (q1), elbow (q3) and wrist-2 (q5) joints, the UR's own joint names. Each label is defined as the sign
+of one det J_red factor (rho, sin q3, sin q5), so the labels are the aspects. The UR has exactly one solution per
+aspect (0 mismatches in 14 426 cases), so they are unambiguous.
+- S matches the classic "shoulder left/right" meaning: O5 in front of or behind the shoulder axis.
+- E's "up/down" flips with the shoulder side.
+- W is computed from the flange position (cos q5 = (p·n − d4)/d6), which is exactly the coupling a spherical
+  wrist would remove.
+
+If the TA prefers, write the labels as (σ_rho, σ_5, σ_3). Nothing changes.
+
 **Q8. Do labels persist along a path?**
 In 99.72 % of about 194 000 steps. The 545 switches were all next to a singular surface: shoulder 68 %, wrist
 24 %, elbow 8 %. So the planner tracks by continuity and checks sigma_min, rather than following a fixed label.

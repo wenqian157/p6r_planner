@@ -456,6 +456,22 @@ and q4 is the remaining in-plane rotation, read off ${}^{3}T_{4}$ (q2 + q3 + q4 
 - **Label = sign triple** (sign rho, sign q5, sign q3). Each branch lies in its own aspect, the region cut out by
   the three singular surfaces det J_red = 0. `branch_of(q)` reads the label off any joint vector.
 
+**Why shoulder / wrist / elbow names, when the UR has no shoulder–wrist decoupling?** What fails on the UR is the
+classic split into an arm that positions a wrist centre (q1–q3) and a spherical wrist that orients the tool
+(q4–q6). The names are not used in that sense here. The IK still has exactly three binary choices, and each is made
+at one joint: shoulder pan q1, elbow q3, wrist 2 q5 (the UR's own joint names). Each label is *defined* as the sign
+of one factor of det J_red = a2 a3 sin q3 sin q5 rho, so the labels are the aspects of the robot.
+- **S** (sign rho): whether O5 lies in front of or behind the shoulder axis. This is the same meaning as
+  "shoulder left/right" on an anthropomorphic arm.
+- **E** (sign sin q3): the bend of the planar 2R. Its physical "up/down" flips with the shoulder side, which is
+  why signs are used rather than up/down.
+- **W** (sign sin q5): computed from the flange *position* (cos q5 = (p·n − d4)/d6), not from the orientation
+  alone. This coupling is exactly what a spherical wrist would remove.
+
+The UR has one solution per aspect: the sign triple read from q matches the label in all 14 426 cases of 3.7. The
+labels are therefore unambiguous and change only across a singular surface. They could equally be written
+(σ_rho, σ_5, σ_3); the names only say where each choice is made.
+
 #### 3.7 Validation
 
 From `results/step05_ik.md` (2000 random configurations, limits ±π):
